@@ -38,25 +38,25 @@
 // Disable (set to 0) all the protocols you do not need/want!
 //
 #define DECODE_BOSEWAVE      1
-#define SEND_BOSEWAVE        1
+#define SEND_BOSEWAVE        0
 
 #define DECODE_DENON         1
-#define SEND_DENON           1
+#define SEND_DENON           0
 
 #define DECODE_DISH          0 // NOT WRITTEN
-#define SEND_DISH            1
+#define SEND_DISH            0
 
 #define DECODE_JVC           1
-#define SEND_JVC             1
+#define SEND_JVC             0
 
 #define DECODE_LEGO_PF       1
-#define SEND_LEGO_PF         1
+#define SEND_LEGO_PF         0
 
 #define DECODE_LG            1
-#define SEND_LG              1
+#define SEND_LG              0
 
 #define DECODE_MAGIQUEST     1
-#define SEND_MAGIQUEST       1
+#define SEND_MAGIQUEST       0
 
 //#define USE_NEC_STANDARD // remove comment to have the standard NEC decoding (LSB first) available.
 #if defined(USE_NEC_STANDARD)
@@ -67,38 +67,38 @@
 #define DECODE_NEC_STANDARD  0
 #define DECODE_NEC           1
 #endif
-#define SEND_NEC             1
-#define SEND_NEC_STANDARD    1
+#define SEND_NEC             0
+#define SEND_NEC_STANDARD    0
 
 #define DECODE_PANASONIC     1
-#define SEND_PANASONIC       1
+#define SEND_PANASONIC       0
 
 #define DECODE_RC5           1
-#define SEND_RC5             1
+#define SEND_RC5             0
 
 #define DECODE_RC6           1
-#define SEND_RC6             1
+#define SEND_RC6             0
 
 #define DECODE_SAMSUNG       1
-#define SEND_SAMSUNG         1
+#define SEND_SAMSUNG         0
 
 #define DECODE_SANYO         1
 #define SEND_SANYO           0 // NOT WRITTEN
 
 #define DECODE_SHARP         1
-#define SEND_SHARP           1
+#define SEND_SHARP           0
 
 #define DECODE_SHARP_ALT     1
-#define SEND_SHARP_ALT       1
+#define SEND_SHARP_ALT       0
 #if SEND_SHARP_ALT
 #define LSB_FIRST_REQUIRED
 #endif
 
 #define DECODE_SONY          1
-#define SEND_SONY            1
+#define SEND_SONY            0
 
 #define DECODE_WHYNTER       1
-#define SEND_WHYNTER         1
+#define SEND_WHYNTER         0
 
 #define DECODE_HASH          1 // special decoder for all protocols
 
@@ -207,6 +207,11 @@ void enableIRIn();
  * Disable IR reception.
  */
 void disableIRIn();
+
+/**
+ * Enable/disable blinking of BLINKLED pin
+ */
+void blink(bool blinkflag);
 
 /**
  * Returns status of reception
