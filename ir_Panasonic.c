@@ -43,36 +43,36 @@ void sendPanasonic(unsigned int address, unsigned long data) {
 
 //+=============================================================================
 #if DECODE_PANASONIC
-bool decodePanasonic(void) {
+bool decodePanasonic(decode_results *results) {
     int offset = 1;
 
-    if (results.rawlen < (2 * PANASONIC_BITS) + 2) {
+    if (results->rawlen < (2 * PANASONIC_BITS) + 2) {
         return false;
     }
 
-    if (!MATCH_MARK(results.rawbuf[offset], PANASONIC_HEADER_MARK)) {
+    if (!MATCH_MARK(results->rawbuf[offset], PANASONIC_HEADER_MARK)) {
         return false;
     }
     offset++;
-    if (!MATCH_MARK(results.rawbuf[offset], PANASONIC_HEADER_SPACE)) {
+    if (!MATCH_MARK(results->rawbuf[offset], PANASONIC_HEADER_SPACE)) {
         return false;
     }
     offset++;
 
     // decode address
-    if (!decodePulseDistanceData(PANASONIC_ADDRESS_BITS, offset, PANASONIC_BIT_MARK,
+    if (!decodePulseDistanceData(results, PANASONIC_ADDRESS_BITS, offset, PANASONIC_BIT_MARK,
         PANASONIC_ONE_SPACE, PANASONIC_ZERO_SPACE, true)) {
         return false;
     }
-    results.address = results.value;
+    results->address = results->value;
 
-    if (!decodePulseDistanceData(PANASONIC_DATA_BITS, offset + PANASONIC_ADDRESS_BITS,
+    if (!decodePulseDistanceData(results, PANASONIC_DATA_BITS, offset + PANASONIC_ADDRESS_BITS,
         PANASONIC_BIT_MARK, PANASONIC_ONE_SPACE, PANASONIC_ZERO_SPACE, true)) {
         return false;
     }
 
-    results.decode_type = PANASONIC;
-    results.bits = PANASONIC_BITS;
+    results->decode_type = PANASONIC;
+    results->bits = PANASONIC_BITS;
 
     return true;
 }

@@ -107,50 +107,50 @@ void sendNECStandard(uint16_t aAddress, uint8_t aCommand, uint8_t aNumberOfRepea
 // NECs have a repeat only 4 items long
 //
 #if DECODE_NEC
-bool decodeNEC(void) {
+bool decodeNEC(decode_results *results) {
     int offset = 1;  // Index in to results; Skip first space.
 
 // Check header "mark"
-    if (!MATCH_MARK(results.rawbuf[offset], NEC_HEADER_MARK)) {
+    if (!MATCH_MARK(results->rawbuf[offset], NEC_HEADER_MARK)) {
         return false;
     }
     offset++;
 
 // Check for repeat
-    if ((results.rawlen == 4) && MATCH_SPACE(results.rawbuf[offset], NEC_REPEAT_SPACE)
-            && MATCH_MARK(results.rawbuf[offset + 1], NEC_BIT_MARK)) {
-        results.bits = 0;
-        results.value = REPEAT;
-        results.isRepeat = true;
-        results.decode_type = NEC;
+    if ((results->rawlen == 4) && MATCH_SPACE(results->rawbuf[offset], NEC_REPEAT_SPACE)
+            && MATCH_MARK(results->rawbuf[offset + 1], NEC_BIT_MARK)) {
+        results->bits = 0;
+        results->value = REPEAT;
+        results->isRepeat = true;
+        results->decode_type = NEC;
         return true;
     }
 
 // Check we have enough data - +3 for start bit mark and space + stop bit mark
-    if (results.rawlen <= (2 * NEC_BITS) + 3) {
+    if (results->rawlen <= (2 * NEC_BITS) + 3) {
         return false;
     }
 
 // Check header "space"
-    if (!MATCH_SPACE(results.rawbuf[offset], NEC_HEADER_SPACE)) {
+    if (!MATCH_SPACE(results->rawbuf[offset], NEC_HEADER_SPACE)) {
         return false;
     }
     offset++;
 
-    if (!decodePulseDistanceData(NEC_BITS, offset, NEC_BIT_MARK,
+    if (!decodePulseDistanceData(results, NEC_BITS, offset, NEC_BIT_MARK,
         NEC_ONE_SPACE, NEC_ZERO_SPACE, true)) {
         return false;
     }
 
     // Stop bit
-    if (!MATCH_MARK(results.rawbuf[offset + (2 * NEC_BITS)], NEC_BIT_MARK)) {
+    if (!MATCH_MARK(results->rawbuf[offset + (2 * NEC_BITS)], NEC_BIT_MARK)) {
         DBG_PRINT("Stop bit verify failed\r\n");
         return false;
     }
 
 // Success
-    results.bits = NEC_BITS;
-    results.decode_type = NEC;
+    results->bits = NEC_BITS;
+    results->decode_type = NEC;
 
     return true;
 }
@@ -160,30 +160,30 @@ bool decodeNEC(void) {
 // NECs have a repeat only 4 items long
 //
 #if DECODE_NEC_STANDARD
-bool decodeNECStandard(void) {
+bool decodeNECStandard(decode_results *results) {
     long data = 0;  // We decode in to here; Start with nothing
     int offset = 1;  // Index in to results; Skip first space.
 
     // Check header "mark"
-    if (!MATCH_MARK(results.rawbuf[offset], NEC_HEADER_MARK)) {
+    if (!MATCH_MARK(results->rawbuf[offset], NEC_HEADER_MARK)) {
         return false;
     }
     offset++;
 
     // Check for repeat
-    if ((results.rawlen == 4) && MATCH_SPACE(results.rawbuf[offset], NEC_REPEAT_SPACE)
-            && MATCH_MARK(results.rawbuf[offset + 1], NEC_BIT_MARK)) {
-        results.isRepeat = true;
-        results.bits = 0;
+    if ((results->rawlen == 4) && MATCH_SPACE(results->rawbuf[offset], NEC_REPEAT_SPACE)
+            && MATCH_MARK(results->rawbuf[offset + 1], NEC_BIT_MARK)) {
+        results->isRepeat = true;
+        results->bits = 0;
         return true;
     }
 
     // Check we have enough data - +3 for start bit mark and space + stop bit mark
-    if (results.rawlen <= (2 * NEC_BITS) + 3) {
+    if (results->rawlen <= (2 * NEC_BITS) + 3) {
         return false;
     }
     // Check header "space"
-    if (!MATCH_SPACE(results.rawbuf[offset], NEC_HEADER_SPACE)) {
+    if (!MATCH_SPACE(results->rawbuf[offset], NEC_HEADER_SPACE)) {
         return false;
     }
     offset++;
@@ -192,7 +192,7 @@ bool decodeNECStandard(void) {
         NEC_ONE_SPACE, NEC_ZERO_SPACE, false);
 
     // Stop bit
-    if (!MATCH_MARK(results.rawbuf[offset + (2 * NEC_BITS)], NEC_BIT_MARK)) {
+    if (!MATCH_MARK(results->rawbuf[offset + (2 * NEC_BITS)], NEC_BIT_MARK)) {
         DBG_PRINT("Stop bit verify failed\r\n");
        return false;
     }
@@ -206,11 +206,11 @@ bool decodeNECStandard(void) {
         return false;
     }
 
-    results.isRepeat = false;
-    results.value = tCommandNotInverted;
-    results.bits = NEC_BITS;
-    results.address = data & 0xFFFF; // first 16 bit
-    results.decode_type = NEC_STANDARD;
+    results->isRepeat = false;
+    results->value = tCommandNotInverted;
+    results->bits = NEC_BITS;
+    results->address = data & 0xFFFF; // first 16 bit
+    results->decode_type = NEC_STANDARD;
 
     return true;
 }

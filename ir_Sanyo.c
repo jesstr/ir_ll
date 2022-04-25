@@ -21,11 +21,11 @@
 
 //+=============================================================================
 #if DECODE_SANYO
-bool decodeSanyo(void) {
+bool decodeSanyo(decode_results *results) {
     long data = 0;
     unsigned int offset = 0;  // Don't skip first space, check its size
 
-    if (results.rawlen < (2 * SANYO_BITS) + 2) {
+    if (results->rawlen < (2 * SANYO_BITS) + 2) {
         return false;
     }
 
@@ -35,37 +35,37 @@ bool decodeSanyo(void) {
 #endif
 
 // Initial space
-    if (results.rawbuf[offset] < (SANYO_DOUBLE_SPACE_USECS / MICROS_PER_TICK)) {
+    if (results->rawbuf[offset] < (SANYO_DOUBLE_SPACE_USECS / MICROS_PER_TICK)) {
         // DBG_PRINT("IR Gap found\r\n");
-        results.bits = 0;
-        results.value = REPEAT;
-        results.isRepeat = true;
-        results.decode_type = SANYO;
+        results->bits = 0;
+        results->value = REPEAT;
+        results->isRepeat = true;
+        results->decode_type = SANYO;
         return true;
     }
     offset++;
 
     // Initial mark
-    if (!MATCH_MARK(results.rawbuf[offset], SANYO_HEADER_MARK)) {
+    if (!MATCH_MARK(results->rawbuf[offset], SANYO_HEADER_MARK)) {
         return false;
     }
     offset++;
 
     // Skip Second Mark
-    if (!MATCH_MARK(results.rawbuf[offset], SANYO_HEADER_MARK)) {
+    if (!MATCH_MARK(results->rawbuf[offset], SANYO_HEADER_MARK)) {
         return false;
     }
     offset++;
 
     while (offset + 1 < irparams.rawlen) {
-        if (!MATCH_SPACE(results.rawbuf[offset], SANYO_HEADER_SPACE)) {
+        if (!MATCH_SPACE(results->rawbuf[offset], SANYO_HEADER_SPACE)) {
             break;
         }
         offset++;
 
-        if (MATCH_MARK(results.rawbuf[offset], SANYO_ONE_MARK)) {
+        if (MATCH_MARK(results->rawbuf[offset], SANYO_ONE_MARK)) {
             data = (data << 1) | 1;
-        } else if (MATCH_MARK(results.rawbuf[offset], SANYO_ZERO_MARK)) {
+        } else if (MATCH_MARK(results->rawbuf[offset], SANYO_ZERO_MARK)) {
             data = (data << 1) | 0;
         } else {
             return false;
@@ -74,14 +74,14 @@ bool decodeSanyo(void) {
     }
 
     // Success
-    results.bits = (offset - 1) / 2;
-    if (results.bits < 12) {
-        results.bits = 0;
+    results->bits = (offset - 1) / 2;
+    if (results->bits < 12) {
+        results->bits = 0;
         return false;
     }
 
-    results.value = data;
-    results.decode_type = SANYO;
+    results->value = data;
+    results->decode_type = SANYO;
     return true;
 }
 #endif

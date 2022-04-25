@@ -50,50 +50,50 @@ void sendWhynter(unsigned long data, int nbits) {
 
 //+=============================================================================
 #if DECODE_WHYNTER
-bool decodeWhynter(void) {
+bool decodeWhynter(decode_results *results) {
     int offset = 1;  // skip initial space
 
     // Check we have the right amount of data +5 for (start bit + header) mark and space + stop bit mark
-    if (results.rawlen <= (2 * WHYNTER_BITS) + 5) {
+    if (results->rawlen <= (2 * WHYNTER_BITS) + 5) {
         return false;
     }
 
     // Sequence begins with a bit mark and a zero space
-    if (!MATCH_MARK(results.rawbuf[offset], WHYNTER_BIT_MARK)) {
+    if (!MATCH_MARK(results->rawbuf[offset], WHYNTER_BIT_MARK)) {
         return false;
     }
     offset++;
 
-    if (!MATCH_SPACE(results.rawbuf[offset], WHYNTER_ZERO_SPACE)) {
+    if (!MATCH_SPACE(results->rawbuf[offset], WHYNTER_ZERO_SPACE)) {
         return false;
     }
     offset++;
 
     // header mark and space
-    if (!MATCH_MARK(results.rawbuf[offset], WHYNTER_HEADER_MARK)) {
+    if (!MATCH_MARK(results->rawbuf[offset], WHYNTER_HEADER_MARK)) {
         return false;
     }
     offset++;
 
-    if (!MATCH_SPACE(results.rawbuf[offset], WHYNTER_HEADER_SPACE)) {
+    if (!MATCH_SPACE(results->rawbuf[offset], WHYNTER_HEADER_SPACE)) {
         return false;
     }
     offset++;
 
-    if (!decodePulseDistanceData(WHYNTER_BITS, offset, WHYNTER_BIT_MARK,
+    if (!decodePulseDistanceData(results, WHYNTER_BITS, offset, WHYNTER_BIT_MARK,
         WHYNTER_ONE_SPACE, WHYNTER_ZERO_SPACE, true)) {
         return false;
     }
 
     // trailing mark / stop bit
-    if (!MATCH_MARK(results.rawbuf[offset + (2 * WHYNTER_BITS)], WHYNTER_BIT_MARK)) {
+    if (!MATCH_MARK(results->rawbuf[offset + (2 * WHYNTER_BITS)], WHYNTER_BIT_MARK)) {
         DBG_PRINT("Stop bit verify failed\r\n");
         return false;
     }
 
     // Success
-    results.bits = WHYNTER_BITS;
-    results.decode_type = WHYNTER;
+    results->bits = WHYNTER_BITS;
+    results->decode_type = WHYNTER;
     return true;
 }
 #endif

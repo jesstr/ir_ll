@@ -152,13 +152,13 @@ void sendRC5ext(uint8_t addr, uint8_t cmd, bool toggle) {
 
 //+=============================================================================
 #if DECODE_RC5
-bool decodeRC5(void) {
+bool decodeRC5(decode_results *results) {
     int nbits;
     long data = 0;
     int used = 0;
     unsigned int offset = 1;  // Skip gap space
 
-    if (results.rawlen < MIN_RC5_SAMPLES + 2) {
+    if (results->rawlen < MIN_RC5_SAMPLES + 2) {
         return false;
     }
 
@@ -176,7 +176,7 @@ bool decodeRC5(void) {
     /*
      * Get data bits - MSB first
      */
-    for (nbits = 0; offset < results.rawlen; nbits++) {
+    for (nbits = 0; offset < results->rawlen; nbits++) {
         int levelA = getRClevel(&results, &offset, &used, RC5_T1);
         int levelB = getRClevel(&results, &offset, &used, RC5_T1);
 
@@ -190,9 +190,9 @@ bool decodeRC5(void) {
     }
 
     // Success
-    results.bits = nbits;
-    results.value = data;
-    results.decode_type = RC5;
+    results->bits = nbits;
+    results->value = data;
+    results->decode_type = RC5;
     return true;
 }
 #endif
@@ -245,23 +245,23 @@ void sendRC6(uint32_t data, uint8_t nbits) {
 
 //+=============================================================================
 #if DECODE_RC6
-bool decodeRC6(void) {
+bool decodeRC6(decode_results *results) {
     int nbits;
     uint32_t data = 0;
     int used = 0;
     unsigned int offset = 1;  // Skip first space
 
-    if (results.rawlen < MIN_RC6_SAMPLES) {
+    if (results->rawlen < MIN_RC6_SAMPLES) {
         return false;
     }
 
     // Initial mark
-    if (!MATCH_MARK(results.rawbuf[offset], RC6_HEADER_MARK)) {
+    if (!MATCH_MARK(results->rawbuf[offset], RC6_HEADER_MARK)) {
         return false;
     }
     offset++;
 
-    if (!MATCH_SPACE(results.rawbuf[offset], RC6_HEADER_SPACE)) {
+    if (!MATCH_SPACE(results->rawbuf[offset], RC6_HEADER_SPACE)) {
         return false;
     }
     offset++;
@@ -274,7 +274,7 @@ bool decodeRC6(void) {
         return false;
     }
 
-    for (nbits = 0; offset < results.rawlen; nbits++) {
+    for (nbits = 0; offset < results->rawlen; nbits++) {
         int levelA, levelB;  // Next two levels
 
         levelA = getRClevel(&results, &offset, &used, RC6_T1);
@@ -303,9 +303,9 @@ bool decodeRC6(void) {
     }
 
     // Success
-    results.bits = nbits;
-    results.value = data;
-    results.decode_type = RC6;
+    results->bits = nbits;
+    results->value = data;
+    results->decode_type = RC6;
     return true;
 }
 #endif

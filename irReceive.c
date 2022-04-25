@@ -1,6 +1,6 @@
 #include "IRremote.h"
 
-static bool decodeHash(void);
+static bool decodeHash(decode_results *results);
 static int compare(unsigned int oldval, unsigned int newval);
 
 
@@ -9,130 +9,133 @@ static int compare(unsigned int oldval, unsigned int newval);
 // Returns 0 if no data ready, 1 if data ready.
 // Results of decoding are stored in results
 //
-bool decode(void) {
+bool decode(decode_results *results) {
     if (irparams.rcvstate != IR_REC_STATE_STOP) {
+        return false;
+    }
+    if (!results) {
         return false;
     }
 
     /*
      * First copy 3 values from irparams to internal results structure
      */
-    results.rawbuf = irparams.rawbuf;
-    results.rawlen = irparams.rawlen;
-    results.overflow = irparams.overflow;
+    results->rawbuf = irparams.rawbuf;
+    results->rawlen = irparams.rawlen;
+    results->overflow = irparams.overflow;
 
     // reset optional values
-    results.address = 0;
-    results.isRepeat = false;
+    results->address = 0;
+    results->isRepeat = false;
 
 #if DECODE_NEC_STANDARD
     DBG_PRINTLN("Attempting NEC_STANDARD decode");
-    if (decodeNECStandard()) {
+    if (decodeNECStandard(results)) {
         return true;
     }
 #endif
 
 #if DECODE_NEC
     DBG_PRINTLN("Attempting NEC decode");
-    if (decodeNEC()) {
+    if (decodeNEC(results)) {
         return true;
     }
 #endif
 
 #if DECODE_SHARP
     DBG_PRINTLN("Attempting Sharp decode");
-    if (decodeSharp()) {
+    if (decodeSharp(results)) {
         return true;
     }
 #endif
 
 #if DECODE_SHARP_ALT
     DBG_PRINTLN("Attempting SharpAlt decode");
-    if (decodeSharpAlt()) {
+    if (decodeSharpAlt(results)) {
         return true;
     }
 #endif
 
 #if DECODE_SONY
     DBG_PRINTLN("Attempting Sony decode");
-    if (decodeSony()) {
+    if (decodeSony(results)) {
         return true;
     }
 #endif
 
 #if DECODE_SANYO
     DBG_PRINTLN("Attempting Sanyo decode");
-    if (decodeSanyo()) {
+    if (decodeSanyo(results)) {
         return true;
     }
 #endif
 
 #if DECODE_RC5
     DBG_PRINTLN("Attempting RC5 decode");
-    if (decodeRC5()) {
+    if (decodeRC5(results)) {
         return true;
     }
 #endif
 
 #if DECODE_RC6
     DBG_PRINTLN("Attempting RC6 decode");
-    if (decodeRC6()) {
+    if (decodeRC6(results)) {
         return true;
     }
 #endif
 
 #if DECODE_PANASONIC
     DBG_PRINTLN("Attempting Panasonic decode");
-    if (decodePanasonic()) {
+    if (decodePanasonic(results)) {
         return true;
     }
 #endif
 
 #if DECODE_LG
     DBG_PRINTLN("Attempting LG decode");
-    if (decodeLG()) {
+    if (decodeLG(results)) {
         return true;
     }
 #endif
 
 #if DECODE_JVC
     DBG_PRINTLN("Attempting JVC decode");
-    if (decodeJVC()) {
+    if (decodeJVC(results)) {
         return true;
     }
 #endif
 
 #if DECODE_SAMSUNG
     DBG_PRINTLN("Attempting SAMSUNG decode");
-    if (decodeSAMSUNG()) {
+    if (decodeSAMSUNG(results)) {
         return true;
     }
 #endif
 
 #if DECODE_WHYNTER
     DBG_PRINTLN("Attempting Whynter decode");
-    if (decodeWhynter()) {
+    if (decodeWhynter(results)) {
         return true;
     }
 #endif
 
 #if DECODE_DENON
     DBG_PRINTLN("Attempting Denon decode");
-    if (decodeDenon()) {
+    if (decodeDenon(results)) {
         return true;
     }
 #endif
 
 #if DECODE_LEGO_PF
     DBG_PRINTLN("Attempting Lego Power Functions");
-    if (decodeLegoPowerFunctions()) {
+    if (decodeLegoPowerFunctions(results)) {
         return true;
     }
 #endif
 
 #if DECODE_MAGIQUEST
     DBG_PRINTLN("Attempting MagiQuest decode");
-    if (decodeMagiQuest()) {
+    if (decodeMagiQuest(results)) {
         return true;
     }
 #endif
@@ -142,7 +145,7 @@ bool decode(void) {
     // decodeHash returns a hash on any input.
     // Thus, it needs to be last in the list.
     // If you add any decodes, add them before this.
-    if (decodeHash()) {
+    if (decodeHash(results)) {
         return true;
     }
 #endif
@@ -203,15 +206,15 @@ bool isIdle(void) {
     return (irparams.rcvstate == IR_REC_STATE_IDLE || irparams.rcvstate == IR_REC_STATE_STOP) ? true : false;
 }
 
-bool available(void) {
+bool available(decode_results *results) {
     if (irparams.rcvstate != IR_REC_STATE_STOP) {
         return false;
     }
-    results.rawbuf = irparams.rawbuf;
-    results.rawlen = irparams.rawlen;
+    results->rawbuf = irparams.rawbuf;
+    results->rawlen = irparams.rawlen;
 
-    results.overflow = irparams.overflow;
-    if (!results.overflow) {
+    results->overflow = irparams.overflow;
+    if (!results->overflow) {
         return true;
     }
     resume(); //skip overflowed buffer
@@ -260,25 +263,25 @@ static int compare(unsigned int oldval, unsigned int newval) {
  * Each bit looks like: MARK + SPACE_1 -> 1
  *                 or : MARK + SPACE_0 -> 0
  * Data is read MSB first if not otherwise enabled.
- * Input is     results.rawbuf
- * Output is    results.value
+ * Input is     results->rawbuf
+ * Output is    results->value
  */
-bool decodePulseDistanceData(uint8_t aNumberOfBits, uint8_t aStartOffset, unsigned int aBitMarkMicros,
+bool decodePulseDistanceData(decode_results *results, uint8_t aNumberOfBits, uint8_t aStartOffset, unsigned int aBitMarkMicros,
         unsigned int aOneSpaceMicros, unsigned int aZeroSpaceMicros, bool aMSBfirst) {
     unsigned long tDecodedData = 0;
 
     if (aMSBfirst) {
         for (uint8_t i = 0; i < aNumberOfBits; i++) {
             // Check for constant length mark
-            if (!MATCH_MARK(results.rawbuf[aStartOffset], aBitMarkMicros)) {
+            if (!MATCH_MARK(results->rawbuf[aStartOffset], aBitMarkMicros)) {
                 return false;
             }
             aStartOffset++;
 
             // Check for variable length space indicating a 0 or 1
-            if (MATCH_SPACE(results.rawbuf[aStartOffset], aOneSpaceMicros)) {
+            if (MATCH_SPACE(results->rawbuf[aStartOffset], aOneSpaceMicros)) {
                 tDecodedData = (tDecodedData << 1) | 1;
-            } else if (MATCH_SPACE(results.rawbuf[aStartOffset], aZeroSpaceMicros)) {
+            } else if (MATCH_SPACE(results->rawbuf[aStartOffset], aZeroSpaceMicros)) {
                 tDecodedData = (tDecodedData << 1) | 0;
             } else {
                 return false;
@@ -290,15 +293,15 @@ bool decodePulseDistanceData(uint8_t aNumberOfBits, uint8_t aStartOffset, unsign
     else {
         for (unsigned long mask = 1UL; aNumberOfBits > 0; mask <<= 1, aNumberOfBits--) {
             // Check for constant length mark
-            if (!MATCH_MARK(results.rawbuf[aStartOffset], aBitMarkMicros)) {
+            if (!MATCH_MARK(results->rawbuf[aStartOffset], aBitMarkMicros)) {
                 return false;
             }
             aStartOffset++;
 
             // Check for variable length space indicating a 0 or 1
-            if (MATCH_SPACE(results.rawbuf[aStartOffset], aOneSpaceMicros)) {
+            if (MATCH_SPACE(results->rawbuf[aStartOffset], aOneSpaceMicros)) {
                 tDecodedData |= mask; // set the bit
-            } else if (MATCH_SPACE(results.rawbuf[aStartOffset], aZeroSpaceMicros)) {
+            } else if (MATCH_SPACE(results->rawbuf[aStartOffset], aZeroSpaceMicros)) {
                 // do not set the bit
             } else {
                 return false;
@@ -308,7 +311,7 @@ bool decodePulseDistanceData(uint8_t aNumberOfBits, uint8_t aStartOffset, unsign
         }
     }
 #endif
-    results.value = tDecodedData;
+    results->value = tDecodedData;
     return true;
 }
 
@@ -321,30 +324,30 @@ bool decodePulseDistanceData(uint8_t aNumberOfBits, uint8_t aStartOffset, unsign
 #define FNV_PRIME_32 16777619
 #define FNV_BASIS_32 2166136261
 
-static bool decodeHash(void) {
+static bool decodeHash(decode_results *results) {
     long hash = FNV_BASIS_32;
 
     // Require at least 6 samples to prevent triggering on noise
-    if (results.rawlen < 6) {
+    if (results->rawlen < 6) {
         return false;
     }
 
-    for (unsigned int i = 1; (i + 2) < results.rawlen; i++) {
-        int value = compare(results.rawbuf[i], results.rawbuf[i + 2]);
+    for (unsigned int i = 1; (i + 2) < results->rawlen; i++) {
+        int value = compare(results->rawbuf[i], results->rawbuf[i + 2]);
         // Add value into the hash
         hash = (hash * FNV_PRIME_32) ^ value;
     }
 
-    results.value = hash;
-    results.bits = 32;
-    results.decode_type = UNKNOWN;
+    results->value = hash;
+    results->bits = 32;
+    results->decode_type = UNKNOWN;
 
     return true;
 }
 #endif // defined(DECODE_HASH)
 
-const char* getProtocolString(void) {
-    switch (results.decode_type) {
+const char* getProtocolString(decode_results *results) {
+    switch (results->decode_type) {
     default:
     case UNKNOWN:
         return ("UNKNOWN");
@@ -442,25 +445,25 @@ const char* getProtocolString(void) {
     }
 }
 
-void printResultShort(void) {
+void printResultShort(decode_results *results) {
     DBG_PRINT("Protocol=%s Data=0x%X Address=0x%X %s\r\n",
-        getProtocolString(), results.value, results.address,
-        results.isRepeat ? "R" : "");
+        getProtocolString(results), results->value, results->address,
+        results->isRepeat ? "R" : "");
 }
 
-void printIRResultRaw(void) {
+void printIRResultRaw(decode_results *results) {
     // Dumps out the decode_results structure.
     // Call this after decode()
-    int count = results.rawlen;
-    printResultShort();
+    int count = results->rawlen;
+    printResultShort(results);
 
-    DBG_PRINT("(%u bits) rawData[%u]:", results.bits, count);
+    DBG_PRINT("(%u bits) rawData[%u]:", results->bits, count);
     for (int i = 0; i < count; i++) {
         if (i & 1) {
-            DBG_PRINT("%u", results.rawbuf[i] * MICROS_PER_TICK);
+            DBG_PRINT("%u", results->rawbuf[i] * MICROS_PER_TICK);
         } else {
             DBG_PRINT("-");
-            DBG_PRINT("%u", (unsigned long)results.rawbuf[i] * MICROS_PER_TICK);
+            DBG_PRINT("%u", (unsigned long)results->rawbuf[i] * MICROS_PER_TICK);
         }
         DBG_PRINT(" ");
     }
@@ -470,12 +473,12 @@ void printIRResultRaw(void) {
 //+=============================================================================
 // Dump out the decode_results structure.
 //
-void printIRResultRawFormatted(void) {
+void printIRResultRawFormatted(decode_results *results) {
     // Print Raw data
-    DBG_PRINT("rawData[%u]:\r\n", results.rawlen - 1);
+    DBG_PRINT("rawData[%u]:\r\n", results->rawlen - 1);
 
-    for (unsigned int i = 1; i < results.rawlen; i++) {
-        unsigned long x = results.rawbuf[i] * MICROS_PER_TICK;
+    for (unsigned int i = 1; i < results->rawlen; i++) {
+        unsigned long x = results->rawbuf[i] * MICROS_PER_TICK;
         if (!(i & 1)) {  // even
             DBG_PRINT("-");
             if (x < 1000) {
@@ -495,7 +498,7 @@ void printIRResultRawFormatted(void) {
                 DBG_PRINT(" ");
             }
             DBG_PRINT("%u", x);
-            if (i < results.rawlen - 1) {
+            if (i < results->rawlen - 1) {
                 DBG_PRINT(", "); //',' not needed for last one
             }
         }
@@ -509,14 +512,14 @@ void printIRResultRawFormatted(void) {
 //+=============================================================================
 // Dump out the decode_results structure.
 //
-void printIRResultAsCArray(void) {
+void printIRResultAsCArray(decode_results *results) {
     // Start declaration
-    DBG_PRINT("uint16_t rawData[%u] = {", results.rawlen - 1);
+    DBG_PRINT("uint16_t rawData[%u] = {", results->rawlen - 1);
 
     // Dump data
-    for (unsigned int i = 1; i < results.rawlen; i++) {
-        DBG_PRINT("%u", results.rawbuf[i] * MICROS_PER_TICK);
-        if (i < results.rawlen - 1)
+    for (unsigned int i = 1; i < results->rawlen; i++) {
+        DBG_PRINT("%u", results->rawbuf[i] * MICROS_PER_TICK);
+        if (i < results->rawlen - 1)
             DBG_PRINT(","); // ',' not needed on last one
         if (!(i & 1))
             DBG_PRINT(" ");
@@ -527,23 +530,23 @@ void printIRResultAsCArray(void) {
 
     // Comment
     DBG_PRINT("  // ");
-    printResultShort();
+    printResultShort(results);
 
     // Newline
     DBG_PRINT("\r\n");
 }
 
-void printIRResultAsCVariables(void) {
+void printIRResultAsCVariables(decode_results *results) {
     // Now dump "known" codes
-    if (results.decode_type != UNKNOWN) {
+    if (results->decode_type != UNKNOWN) {
 
         // Some protocols have an address
-        if(results.address != 0){
-            DBG_PRINT("uint16_t address = 0x%X;\r\n", results.address);
+        if(results->address != 0){
+            DBG_PRINT("uint16_t address = 0x%X;\r\n", results->address);
         }
 
         // All protocols have data
-        DBG_PRINT("uint16_t data = 0x%x;\r\n", results.value);
+        DBG_PRINT("uint16_t data = 0x%x;\r\n", results->value);
         DBG_PRINT("\r\n");
     }
 }

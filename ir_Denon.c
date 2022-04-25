@@ -51,7 +51,7 @@ void sendDenon(unsigned long data, int nbits) {
 //+=============================================================================
 //
 #if DECODE_DENON
-bool decodeDenon(void) {
+bool decodeDenon(decode_results *results) {
     int offset = 1;  // Skip the gap reading
 
     // Check we have the right amount of data
@@ -60,25 +60,25 @@ bool decodeDenon(void) {
     }
 
     // Check initial Mark+Space match
-    if (!MATCH_MARK(results.rawbuf[offset], DENON_HEADER_MARK)) {
+    if (!MATCH_MARK(results->rawbuf[offset], DENON_HEADER_MARK)) {
         return false;
     }
     offset++;
 
-    if (!MATCH_SPACE(results.rawbuf[offset], DENON_HEADER_SPACE)) {
+    if (!MATCH_SPACE(results->rawbuf[offset], DENON_HEADER_SPACE)) {
         return false;
     }
     offset++;
 
     // Read the bits in
-    if (!decodePulseDistanceData(DENON_BITS, offset, DENON_BIT_MARK,
+    if (!decodePulseDistanceData(results, DENON_BITS, offset, DENON_BIT_MARK,
         DENON_ONE_SPACE, DENON_ZERO_SPACE, true)) {
         return false;
     }
 
     // Success
-    results.bits = DENON_BITS;
-    results.decode_type = DENON;
+    results->bits = DENON_BITS;
+    results->decode_type = DENON;
     return true;
 }
 #endif

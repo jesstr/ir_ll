@@ -66,30 +66,30 @@ void sendSharpAlt(uint8_t address, uint8_t command) {
 
 //+=============================================================================
 #if DECODE_SHARP_ALT
-bool decodeSharpAlt() {
+bool decodeSharpAlt(decode_results *results) {
     static bool is_first_repeat = true;
 
     // Check we have enough data.
-    if (results.rawlen < (SHARP_ALT_RAWLEN))
+    if (results->rawlen < (SHARP_ALT_RAWLEN))
         return false;
 
     // Check stop mark.
-    if (!MATCH_MARK(results.rawbuf[SHARP_ALT_RAWLEN - 1], SHARP_ALT_BIT_MARK))
+    if (!MATCH_MARK(results->rawbuf[SHARP_ALT_RAWLEN - 1], SHARP_ALT_BIT_MARK))
         return false;
 
     // Check the "check bit." If this bit is not 0 than it is an inverted
     // frame, which we ignore.
-    if (!MATCH_SPACE(results.rawbuf[SHARP_ALT_RAWLEN - 2], SHARP_ALT_ZERO_SPACE))
+    if (!MATCH_SPACE(results->rawbuf[SHARP_ALT_RAWLEN - 2], SHARP_ALT_ZERO_SPACE))
         return false;
 
     // Check for repeat.
-    long initial_space = ((long) results.rawbuf[0]) * MICROS_PER_TICK;
+    long initial_space = ((long) results->rawbuf[0]) * MICROS_PER_TICK;
     if (initial_space <= SHARP_ALT_REPEAT_SPACE) {
         if (!is_first_repeat) {
-            results.bits = 0;
-            results.value = REPEAT;
-            results.isRepeat = true;
-            results.decode_type = SHARP;
+            results->bits = 0;
+            results->value = REPEAT;
+            results->isRepeat = true;
+            results->decode_type = SHARP;
             return true;
         } else {
             // Ignore the first repeat that always comes after the
@@ -104,19 +104,19 @@ bool decodeSharpAlt() {
     // expansion bit (-2).
     uint16_t bits = 0;
     for (uint8_t i = SHARP_ALT_RAWLEN - 6; i > 1; i -= 2) {
-        if (MATCH_SPACE(results.rawbuf[i], SHARP_ALT_ONE_SPACE)) {
+        if (MATCH_SPACE(results->rawbuf[i], SHARP_ALT_ONE_SPACE)) {
             bits = (bits << 1) | 1;
-        } else if (MATCH_SPACE(results.rawbuf[i], SHARP_ALT_ZERO_SPACE)) {
+        } else if (MATCH_SPACE(results->rawbuf[i], SHARP_ALT_ZERO_SPACE)) {
             bits = (bits << 1) | 0;
         } else {
             return false;
         }
     }
 
-    results.bits = SHARP_ALT_ADDRESS_BITS + SHARP_ALT_COMMAND_BITS;
-    results.address = (bits & (1 << (SHARP_ALT_ADDRESS_BITS))) - 1;
-    results.value = bits >> SHARP_ALT_ADDRESS_BITS; // command
-    results.decode_type = SHARP_ALT;
+    results->bits = SHARP_ALT_ADDRESS_BITS + SHARP_ALT_COMMAND_BITS;
+    results->address = (bits & (1 << (SHARP_ALT_ADDRESS_BITS))) - 1;
+    results->value = bits >> SHARP_ALT_ADDRESS_BITS; // command
+    results->decode_type = SHARP_ALT;
     is_first_repeat = true;
     return true;
 }

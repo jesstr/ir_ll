@@ -75,7 +75,7 @@ void sendMagiQuest(unsigned long wand_id, unsigned int magnitude) {
 //+=============================================================================
 //
 #if DECODE_MAGIQUEST
-bool decodeMagiQuest() {
+bool decodeMagiQuest(decode_results *results) {
     magiquest_t data;  // Somewhere to build our code
     unsigned int offset = 1;  // Skip the gap reading
 
@@ -89,7 +89,7 @@ bool decodeMagiQuest() {
 #endif
 
     // Check we have enough data
-    if (results.rawlen < 2 * MAGIQUEST_BITS) {
+    if (results->rawlen < 2 * MAGIQUEST_BITS) {
         DBG_PRINT("Not enough bits to be a MagiQuest packet (%u < %u)\r\n", 
             irparams.rawlen, MAGIQUEST_BITS*2);
         return false;
@@ -97,9 +97,9 @@ bool decodeMagiQuest() {
 
     // Read the bits in
     data.llword = 0;
-    while (offset + 1 < results.rawlen) {
-        mark_ = results.rawbuf[offset++];
-        space_ = results.rawbuf[offset++];
+    while (offset + 1 < results->rawlen) {
+        mark_ = results->rawbuf[offset++];
+        space_ = results->rawbuf[offset++];
         ratio_ = space_ / mark_;
 
         DBG_PRINT("mark=%u space=%u ratio=%u\r\n",
@@ -129,13 +129,13 @@ bool decodeMagiQuest() {
 #endif
 
     // Success
-    results.decode_type = MAGIQUEST;
-    results.bits = offset / 2;
-    results.value = data.cmd.wand_id;
-    results.magnitude = data.cmd.magnitude;
+    results->decode_type = MAGIQUEST;
+    results->bits = offset / 2;
+    results->value = data.cmd.wand_id;
+    results->magnitude = data.cmd.magnitude;
 
     DBG_PRINT("MQ: bits=%u value=%u magnitude=%u\r\n",
-        results.bits, results.value, results.magnitude);
+        results->bits, results->value, results->magnitude);
 
     return true;
 }

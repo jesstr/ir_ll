@@ -121,21 +121,21 @@ static void dumpSequence(const volatile uint16_t *data, size_t length, uint16_t 
  * Using Print instead of Stream saves 1020 bytes program memory
  * Changed from & to * parameter type to be more transparent and consistent with other code of IRremote
  */
-void dumpPronto(unsigned int frequency) {
+void dumpPronto(decode_results *results, unsigned int frequency) {
     dumpNumber(frequency > 0 ? learnedToken : learnedNonModulatedToken);
     dumpNumber(toFrequencyCode(frequency));
-    dumpNumber((results.rawlen + 1) / 2);
+    dumpNumber((results->rawlen + 1) / 2);
     dumpNumber(0);
     unsigned int timebase = toTimebase(frequency);
-    dumpSequence(results.rawbuf + RESULT_JUNK_COUNT, results.rawlen - RESULT_JUNK_COUNT, timebase);
+    dumpSequence(results->rawbuf + RESULT_JUNK_COUNT, results->rawlen - RESULT_JUNK_COUNT, timebase);
 }
 
 //+=============================================================================
 // Dump out the raw data as Pronto Hex.
 // I know Stream * is locally inconsistent, but all global print functions use it
 //
-void printIRResultAsPronto(unsigned int frequency) {
+void printIRResultAsPronto(decode_results *results, unsigned int frequency) {
     DBG_PRINT("Pronto Hex: ");
-    dumpPronto(frequency);
+    dumpPronto(results, frequency);
     DBG_PRINT("\r\n");
 }

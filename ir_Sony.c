@@ -50,44 +50,44 @@ void sendSony(unsigned long data, int nbits) {
 
 //+=============================================================================
 #if DECODE_SONY
-bool decodeSony(void) {
+bool decodeSony(decode_results *results) {
     long data = 0;
     unsigned int offset = 0;  // Dont skip first space, check its size
 
-    if (results.rawlen < (2 * SONY_BITS) + 2) {
+    if (results->rawlen < (2 * SONY_BITS) + 2) {
         return false;
     }
 
     // Some Sony's deliver repeats fast after first
     // unfortunately can't spot difference from of repeat from two fast clicks
-    if (results.rawbuf[offset] < (SONY_DOUBLE_SPACE_USECS / MICROS_PER_TICK)) {
+    if (results->rawbuf[offset] < (SONY_DOUBLE_SPACE_USECS / MICROS_PER_TICK)) {
         DBG_PRINTLN("IR Gap found");
-        results.bits = 0;
-        results.value = REPEAT;
-        results.isRepeat = true;
-        results.decode_type = UNKNOWN;
+        results->bits = 0;
+        results->value = REPEAT;
+        results->isRepeat = true;
+        results->decode_type = UNKNOWN;
         return true;
     }
     offset++;
 
     // Check header "mark"
-    if (!MATCH_MARK(results.rawbuf[offset], SONY_HEADER_MARK)) {
+    if (!MATCH_MARK(results->rawbuf[offset], SONY_HEADER_MARK)) {
         return false;
     }
     offset++;
 
     // Check header "space"
-    if (!MATCH_SPACE(results.rawbuf[offset], SONY_SPACE)) {
+    if (!MATCH_SPACE(results->rawbuf[offset], SONY_SPACE)) {
         return false;
     }
     offset++;
 
     // MSB first - Not compatible to standard, which says LSB first :-(
-    while (offset < results.rawlen) {
+    while (offset < results->rawlen) {
         // bit value is determined by length of the mark
-        if (MATCH_MARK(results.rawbuf[offset], SONY_ONE_MARK)) {
+        if (MATCH_MARK(results->rawbuf[offset], SONY_ONE_MARK)) {
             data = (data << 1) | 1;
-        } else if (MATCH_MARK(results.rawbuf[offset], SONY_ZERO_MARK)) {
+        } else if (MATCH_MARK(results->rawbuf[offset], SONY_ZERO_MARK)) {
             data = (data << 1) | 0;
         } else {
             return false;
@@ -95,15 +95,15 @@ bool decodeSony(void) {
         offset++;
 
         // check for the constant space length
-        if (!MATCH_SPACE(results.rawbuf[offset], SONY_SPACE)) {
+        if (!MATCH_SPACE(results->rawbuf[offset], SONY_SPACE)) {
             return false;
         }
         offset++;
     }
 
-    results.bits = SONY_BITS;
-    results.value = data;
-    results.decode_type = SONY;
+    results->bits = SONY_BITS;
+    results->value = data;
+    results->decode_type = SONY;
     return true;
 }
 #endif

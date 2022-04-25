@@ -144,22 +144,22 @@ void sendShuzu(unsigned long data, int nbits) {
 //+=============================================================================
 //
 #if DECODE_SHUZU
-bool decodeShuzu(void) {
+bool decodeShuzu(decode_results *results) {
     unsigned long data = 0;  // Somewhere to build our code
     int offset = 1;  // Skip the gap reading
 
     // Check we have the right amount of data
-    if (results.rawlen != 1 + 2 + (2 * SHUZU_BITS) + 1) {
+    if (results->rawlen != 1 + 2 + (2 * SHUZU_BITS) + 1) {
         return false;
     }
 
     // Check initial Mark+Space match
-    if (!MATCH_MARK(results.rawbuf[offset], SHUZU_HEADER_MARK)) {
+    if (!MATCH_MARK(results->rawbuf[offset], SHUZU_HEADER_MARK)) {
         return false;
     }
     offset++;
 
-    if (!MATCH_SPACE(results.rawbuf[offset], SHUZU_HEADER_SPACE)) {
+    if (!MATCH_SPACE(results->rawbuf[offset], SHUZU_HEADER_SPACE)) {
         return false;
     }
     offset++;
@@ -170,15 +170,15 @@ bool decodeShuzu(void) {
 //    for (int i = 0; i < SHUZU_BITS; i++) {
 //        // Each bit looks like: MARK + SPACE_1 -> 1
 //        //                 or : MARK + SPACE_0 -> 0
-//        if (!MATCH_MARK(results.rawbuf[offset], SHUZU_BIT_MARK)) {
+//        if (!MATCH_MARK(results->rawbuf[offset], SHUZU_BIT_MARK)) {
 //            return false;
 //        }
 //        offset++;
 //
 //        // IR data is big-endian, so we shuffle it in from the right:
-//        if (MATCH_SPACE(results.rawbuf[offset], SHUZU_ONE_SPACE)) {
+//        if (MATCH_SPACE(results->rawbuf[offset], SHUZU_ONE_SPACE)) {
 //            data = (data << 1) | 1;
-//        } else if (MATCH_SPACE(results.rawbuf[offset], SHUZU_ZERO_SPACE)) {
+//        } else if (MATCH_SPACE(results->rawbuf[offset], SHUZU_ZERO_SPACE)) {
 //            data = (data << 1) | 0;
 //        } else {
 //            return false;
@@ -187,9 +187,9 @@ bool decodeShuzu(void) {
 //    }
 
     // Success
-    results.bits = SHUZU_BITS;
-    results.value = data;
-    results.decode_type = SHUZU;
+    results->bits = SHUZU_BITS;
+    results->value = data;
+    results->decode_type = SHUZU;
     return true;
 }
 #endif

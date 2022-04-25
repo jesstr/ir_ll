@@ -94,7 +94,7 @@ void sendSharp(unsigned int address, unsigned int command) {
 // Tesded on a DENON AVR-1804 reciever
 
 #if DECODE_SHARP
-bool decodeSharp(void) {
+bool decodeSharp(decode_results *results) {
     unsigned long lastData = 0;  // to store last data
     int offset = 1;  //skip long space
     int loops = 1; //number of bursts
@@ -110,21 +110,21 @@ bool decodeSharp(void) {
         return false;
 
     // Check the first mark to see if it fits the SHARP_BIT_MARK_RECV length
-    if (!MATCH_MARK(results.rawbuf[offset], SHARP_BIT_MARK_RECV))
+    if (!MATCH_MARK(results->rawbuf[offset], SHARP_BIT_MARK_RECV))
         return false;
     //check the first pause and see if it fits the SHARP_ONE_SPACE or SHARP_ZERO_SPACE length
-    if (!(MATCH_SPACE(results.rawbuf[offset + 1], SHARP_ONE_SPACE) || MATCH_SPACE(results.rawbuf[offset + 1], SHARP_ZERO_SPACE)))
+    if (!(MATCH_SPACE(results->rawbuf[offset + 1], SHARP_ONE_SPACE) || MATCH_SPACE(results->rawbuf[offset + 1], SHARP_ZERO_SPACE)))
         return false;
 
     // Read the bits in
     for (int j = 0; j < loops; j++) {
-        if (!decodePulseDistanceData(SHARP_ADDR_BITS, offset, SHARP_BIT_MARK_SEND,
+        if (!decodePulseDistanceData(results, SHARP_ADDR_BITS, offset, SHARP_BIT_MARK_SEND,
             SHARP_ONE_SPACE, SHARP_ZERO_SPACE, true)) {
             return false;
         }
-        results.address = results.value;
+        results->address = results->value;
 
-        if (!decodePulseDistanceData( SHARP_DATA_BITS, offset + SHARP_ADDR_BITS, SHARP_BIT_MARK_SEND,
+        if (!decodePulseDistanceData(results,  SHARP_DATA_BITS, offset + SHARP_ADDR_BITS, SHARP_BIT_MARK_SEND,
         SHARP_ONE_SPACE, SHARP_ZERO_SPACE, true)) {
             return false;
         }
@@ -133,15 +133,15 @@ bool decodeSharp(void) {
         offset += 6;
 
         //Check if last burst data is equal to this burst (lastData already inverted)
-        if (lastData != 0 && results.value != lastData)
+        if (lastData != 0 && results->value != lastData)
             return false;
         //save current burst of data but invert (XOR) the last 10 bits (8 data bits + exp bit + chk bit)
-        lastData = results.value ^ 0xFF;
+        lastData = results->value ^ 0xFF;
     }
 
 // Success
-    results.bits = SHARP_BITS;
-    results.decode_type = SHARP;
+    results->bits = SHARP_BITS;
+    results->decode_type = SHARP;
     return true;
 }
 #endif

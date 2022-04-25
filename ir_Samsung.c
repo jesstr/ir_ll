@@ -40,22 +40,22 @@ void sendSAMSUNG(unsigned long data, int nbits) {
 // SAMSUNGs have a repeat only 4 items long
 //
 #if DECODE_SAMSUNG
-bool decodeSAMSUNG(void) {
+bool decodeSAMSUNG(decode_results *results) {
     int offset = 1;  // Skip first space
 
     // Initial mark
-    if (!MATCH_MARK(results.rawbuf[offset], SAMSUNG_HEADER_MARK)) {
+    if (!MATCH_MARK(results->rawbuf[offset], SAMSUNG_HEADER_MARK)) {
         return false;
     }
     offset++;
 
 // Check for repeat
-    if ((irparams.rawlen == 4) && MATCH_SPACE(results.rawbuf[offset], SAMSUNG_REPEAT_SPACE)
-            && MATCH_MARK(results.rawbuf[offset + 1], SAMSUNG_BIT_MARK)) {
-        results.bits = 0;
-        results.value = REPEAT;
-        results.isRepeat = true;
-        results.decode_type = SAMSUNG;
+    if ((irparams.rawlen == 4) && MATCH_SPACE(results->rawbuf[offset], SAMSUNG_REPEAT_SPACE)
+            && MATCH_MARK(results->rawbuf[offset + 1], SAMSUNG_BIT_MARK)) {
+        results->bits = 0;
+        results->value = REPEAT;
+        results->isRepeat = true;
+        results->decode_type = SAMSUNG;
         return true;
     }
     if (irparams.rawlen < (2 * SAMSUNG_BITS) + 4) {
@@ -63,19 +63,19 @@ bool decodeSAMSUNG(void) {
     }
 
 // Initial space
-    if (!MATCH_SPACE(results.rawbuf[offset], SAMSUNG_HEADER_SPACE)) {
+    if (!MATCH_SPACE(results->rawbuf[offset], SAMSUNG_HEADER_SPACE)) {
         return false;
     }
     offset++;
 
-    if (!decodePulseDistanceData(SAMSUNG_BITS, offset, SAMSUNG_BIT_MARK,
+    if (!decodePulseDistanceData(results, SAMSUNG_BITS, offset, SAMSUNG_BIT_MARK,
         SAMSUNG_ONE_SPACE, SAMSUNG_ZERO_SPACE, true)) {
         return false;
     }
 
 // Success
-    results.bits = SAMSUNG_BITS;
-    results.decode_type = SAMSUNG;
+    results->bits = SAMSUNG_BITS;
+    results->decode_type = SAMSUNG;
     return true;
 }
 #endif

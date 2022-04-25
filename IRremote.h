@@ -196,17 +196,17 @@ typedef struct {
  * @param results decode_results instance returning the decode, if any.
  * @return success of operation.
  */
-bool decode();
+bool decode(decode_results *results);
 
 /**
  * Enable IR reception.
  */
-void enableIRIn();
+void enableIRIn(void);
 
 /**
  * Disable IR reception.
  */
-void disableIRIn();
+void disableIRIn(void);
 
 /**
  * Enable/disable blinking of BLINKLED pin
@@ -217,25 +217,25 @@ void blink(bool blinkflag);
  * Returns status of reception
  * @return true if no reception is on-going.
  */
-bool isIdle();
+bool isIdle(void);
 
 /**
  * Returns status of reception and copies IR-data to decode_results buffer if true.
  * @return true if data is available.
  */
-bool available();
+bool available(decode_results *results);
 
 /**
  * Called to re-enable IR reception.
  */
-void resume();
+void resume(void);
 
-const char* getProtocolString();
-void printResultShort(void);
-void printIRResultRaw(void);
-void printIRResultRawFormatted(void);
-void printIRResultAsCArray(void);
-void printIRResultAsCVariables(void);
+const char* getProtocolString(decode_results *results);
+void printResultShort(decode_results *results);
+void printIRResultRaw(decode_results *results);
+void printIRResultRawFormatted(decode_results *results);
+void printIRResultAsCArray(decode_results *results);
+void printIRResultAsCVariables(decode_results *results);
 
 /**
  * Print the result (second argument) as Pronto Hex on the Stream supplied as argument.
@@ -243,13 +243,11 @@ void printIRResultAsCVariables(void);
  * @param results the decode_results as delivered from irrecv.decode.
  * @param frequency Modulation frequency in Hz. Often 38000Hz.
  */
-void dumpPronto(unsigned int frequency);
-void printIRResultAsPronto(unsigned int frequency);
+void dumpPronto(decode_results *results, unsigned int frequency);
+void printIRResultAsPronto(decode_results *results, unsigned int frequency);
 
-bool decodePulseDistanceData(uint8_t aNumberOfBits, uint8_t aStartOffset, unsigned int aBitMarkMicros,
+bool decodePulseDistanceData(decode_results *results, uint8_t aNumberOfBits, uint8_t aStartOffset, unsigned int aBitMarkMicros,
         unsigned int aOneSpaceMicros, unsigned int aZeroSpaceMicros, bool aMSBfirst);
-
-extern decode_results results; // the instance for decoding
 
 //......................................................................
 #if DECODE_RC5
@@ -258,73 +256,73 @@ extern decode_results results; // the instance for decoding
  * @param results decode_results instance returning the decode, if any.
  * @return Success of the operation.
  */
-bool decodeRC5();
+bool decodeRC5(decode_results *results);
 #endif
 #if DECODE_RC6
-bool decodeRC6();
+bool decodeRC6(decode_results *results);
 #endif
 //......................................................................
 #if DECODE_NEC
-bool decodeNEC();
+bool decodeNEC(decode_results *results);
 #endif
 #if DECODE_NEC_STANDARD
-bool decodeNECStandard();
+bool decodeNECStandard(decode_results *results);
 #endif
 
 //......................................................................
 #if DECODE_SONY
-bool decodeSony();
+bool decodeSony(decode_results *results);
 #endif
 //......................................................................
 #if DECODE_PANASONIC
-bool decodePanasonic();
+bool decodePanasonic(decode_results *results);
 #endif
 //......................................................................
 #if DECODE_JVC
-bool decodeJVC();
+bool decodeJVC(decode_results *results);
 #endif
 //......................................................................
 #if DECODE_SAMSUNG
-bool decodeSAMSUNG();
+bool decodeSAMSUNG(decode_results *results);
 #endif
 //......................................................................
 #if DECODE_WHYNTER
-bool decodeWhynter();
+bool decodeWhynter(decode_results *results);
 #endif
 //......................................................................
 #if DECODE_LG
-bool decodeLG();
+bool decodeLG(decode_results *results);
 #endif
 //......................................................................
 #if DECODE_SANYO
-bool decodeSanyo();
+bool decodeSanyo(decode_results *results);
 #endif
 //......................................................................
 #if DECODE_DISH
-    bool  decodeDish () ; // NOT WRITTEN
+    bool  decodeDish (decode_results *results) ; // NOT WRITTEN
 #endif
 //......................................................................
 #if DECODE_SHARP
-bool decodeSharp();
+bool decodeSharp(decode_results *results);
 #endif
 #if DECODE_SHARP_ALT
-bool decodeSharpAlt();
+bool decodeSharpAlt(decode_results *results);
 #endif
 //......................................................................
 #if DECODE_DENON
-bool decodeDenon();
+bool decodeDenon(decode_results *results);
 #endif
 //......................................................................
 #if DECODE_LEGO_PF
-    bool  decodeLegoPowerFunctions () ;
+    bool  decodeLegoPowerFunctions (decode_results *results) ;
 #endif
 //......................................................................
 #if DECODE_BOSEWAVE
-bool decodeBoseWave(void);
+bool decodeBoseWave(decode_results *results);
 #endif
 //......................................................................
 #if DECODE_MAGIQUEST
-bool decodeMagiQuest();
+bool decodeMagiQuest(decode_results *results);
 #endif
 
 /****************************************************

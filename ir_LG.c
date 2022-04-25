@@ -18,7 +18,7 @@
 
 //+=============================================================================
 #if DECODE_LG
-bool decodeLG(void) {
+bool decodeLG(decode_results *results) {
     int offset = 1; // Skip first space
 
     // Check we have the right amount of data  +3 for start bit mark and space + stop bit mark
@@ -26,29 +26,29 @@ bool decodeLG(void) {
         return false;
 
     // Initial mark/space
-    if (!MATCH_MARK(results.rawbuf[offset], LG_HEADER_MARK)) {
+    if (!MATCH_MARK(results->rawbuf[offset], LG_HEADER_MARK)) {
         return false;
     }
     offset++;
 
-    if (!MATCH_SPACE(results.rawbuf[offset], LG_HEADER_SPACE)) {
+    if (!MATCH_SPACE(results->rawbuf[offset], LG_HEADER_SPACE)) {
         return false;
     }
     offset++;
 
-    if (!decodePulseDistanceData(LG_BITS, offset, LG_BIT_MARK,
+    if (!decodePulseDistanceData(results, LG_BITS, offset, LG_BIT_MARK,
         LG_ONE_SPACE, LG_ZERO_SPACE, true)) {
         return false;
     }
     // Stop bit
-    if (!MATCH_MARK(results.rawbuf[offset + (2 * LG_BITS)], LG_BIT_MARK)) {
+    if (!MATCH_MARK(results->rawbuf[offset + (2 * LG_BITS)], LG_BIT_MARK)) {
         DBG_PRINT("Stop bit verify failed\r\n");
         return false;
     }
 
     // Success
-    results.bits = LG_BITS;
-    results.decode_type = LG;
+    results->bits = LG_BITS;
+    results->decode_type = LG;
     return true;
 }
 #endif

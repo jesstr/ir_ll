@@ -50,50 +50,50 @@ void sendJVC(unsigned long data, int nbits, bool repeat) {
 
 //+=============================================================================
 #if DECODE_JVC
-bool decodeJVC(void) {
+bool decodeJVC(decode_results *results) {
     int offset = 1; // Skip first space
 
     // Check for repeat
-    if ((results.rawlen - 1 == 33) && MATCH_MARK(results.rawbuf[offset], JVC_BIT_MARK)
-            && MATCH_MARK(results.rawbuf[results.rawlen - 1], JVC_BIT_MARK)) {
-        results.bits = 0;
-        results.value = REPEAT;
-        results.isRepeat = true;
-        results.decode_type = JVC;
+    if ((results->rawlen - 1 == 33) && MATCH_MARK(results->rawbuf[offset], JVC_BIT_MARK)
+            && MATCH_MARK(results->rawbuf[results->rawlen - 1], JVC_BIT_MARK)) {
+        results->bits = 0;
+        results->value = REPEAT;
+        results->isRepeat = true;
+        results->decode_type = JVC;
         return true;
     }
 
     // Initial mark
-    if (!MATCH_MARK(results.rawbuf[offset], JVC_HEADER_MARK)) {
+    if (!MATCH_MARK(results->rawbuf[offset], JVC_HEADER_MARK)) {
         return false;
     }
     offset++;
 
     // Check we have enough data - +3 for start bit mark and space + stop bit mark
-    if (results.rawlen <= (2 * JVC_BITS) + 3) {
+    if (results->rawlen <= (2 * JVC_BITS) + 3) {
         return false;
     }
 
     // Initial space
-    if (!MATCH_SPACE(results.rawbuf[offset], JVC_HEADER_SPACE)) {
+    if (!MATCH_SPACE(results->rawbuf[offset], JVC_HEADER_SPACE)) {
         return false;
     }
     offset++;
 
-    if (!decodePulseDistanceData(JVC_BITS, offset, JVC_BIT_MARK,
+    if (!decodePulseDistanceData(results, JVC_BITS, offset, JVC_BIT_MARK,
         JVC_ONE_SPACE, JVC_ZERO_SPACE, true)) {
         return false;
     }
 
     // Stop bit
-    if (!MATCH_MARK(results.rawbuf[offset + (2 * JVC_BITS)], JVC_BIT_MARK)) {
+    if (!MATCH_MARK(results->rawbuf[offset + (2 * JVC_BITS)], JVC_BIT_MARK)) {
         DBG_PRINT("Stop bit verify failed\r\n");
         return false;
     }
 
     // Success
-    results.bits = JVC_BITS;
-    results.decode_type = JVC;
+    results->bits = JVC_BITS;
+    results->decode_type = JVC;
 
     return true;
 }
