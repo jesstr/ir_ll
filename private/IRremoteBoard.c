@@ -1,17 +1,15 @@
 #include <stdint.h>
 #include "stm32l0xx_ll_tim.h"
 
-// настройка таймера для приема - переполнение каждые 50 мкс (в данном случае системная частота 72Мгц)
-#define MYPRESCALER 23 // получаем частоту 1МГц
-#define MYPERIOD    49    // 50 мкс
+#define TIM_SYSCLOCK	24000000 // Hz
 
-// настройка таймера для отправки - указать системную частоту таймера
-#define MYSYSCLOCK  24000000
+#define TIM_PRESCALER	((TIM_SYSCLOCK) / 1000000 - 1) // 1Mhz
+#define TIM_PERIOD		(50 - 1) // 50us
 
 
 void timerConfigForSend(uint16_t aFrequencyKHz)
 {
-	uint16_t pwm_freq = MYSYSCLOCK / (aFrequencyKHz * 1000) - 1;
+	uint16_t pwm_freq = TIM_SYSCLOCK / (aFrequencyKHz * 1000) - 1;
 	uint16_t pwm_pulse = pwm_freq / 3;
 
 	TIM_TypeDef *TIMx = TIM2;
@@ -39,7 +37,7 @@ void timerConfigForSend(uint16_t aFrequencyKHz)
 }
 
 
-void timerConfigForReceive(void) // initialization
+void timerConfigForReceive(void)
 {
 	TIM_TypeDef *TIMx = TIM2;
 
@@ -47,9 +45,9 @@ void timerConfigForReceive(void) // initialization
 
 	LL_TIM_InitTypeDef TIM_InitStruct = {0};
 
-	TIM_InitStruct.Prescaler = MYPRESCALER;
+	TIM_InitStruct.Prescaler = TIM_PRESCALER;
 	TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-	TIM_InitStruct.Autoreload = MYPERIOD;
+	TIM_InitStruct.Autoreload = TIM_PERIOD;
 	TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
 	LL_TIM_Init(TIMx, &TIM_InitStruct);
 
