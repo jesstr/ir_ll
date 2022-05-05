@@ -95,7 +95,7 @@ int MATCH_SPACE(uint16_t measured_ticks, unsigned int desired_us) {
 // Fires on Rising edge, Falling edge and Overflow
 //
 static inline void timerInputCaptureHandler(void) {
-    TIM_TypeDef *TIMx = TIM2;
+    TIM_TypeDef *TIMx = IR_RECEIVE_TIM;
 
     if (irparams.rawlen >= RAW_BUFFER_LENGTH) {
         // Flag up a read overflow; Stop the State Machine
@@ -159,7 +159,7 @@ static inline void timerInputCaptureHandler(void) {
 // Recorded in ticks of 50uS [microseconds, 0.000050 seconds]
 //
 static inline void timerPeriodicHandler(void) {
-    TIM_TypeDef *TIMx = TIM2;
+    TIM_TypeDef *TIMx = IR_RECEIVE_TIM;
 
     if (LL_TIM_IsActiveFlag_UPDATE(TIMx)) {
         LL_TIM_ClearFlag_UPDATE(TIMx);

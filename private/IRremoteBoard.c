@@ -19,7 +19,7 @@ void timerConfigForSend(uint16_t aFrequencyKHz)
 	uint16_t pwm_freq = TIM_SYSCLOCK / (aFrequencyKHz * 1000) - 1;
 	uint16_t pwm_pulse = pwm_freq / 3;
 
-	TIM_TypeDef *TIMx = TIM2;
+	TIM_TypeDef *TIMx = IR_SEND_TIM;
 
 	LL_TIM_InitTypeDef TIM_InitStruct = {0};
 	LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
@@ -47,8 +47,8 @@ void timerConfigForSend(uint16_t aFrequencyKHz)
 // Timer reconfiguration for Input Capture mode
 static inline void timerConfigInputCaptureForReceive(void)
 {
-	TIM_TypeDef *TIMx = TIM2;
-	IRQn_Type IRQn = TIM2_IRQn;
+	TIM_TypeDef *TIMx = IR_RECEIVE_TIM;
+	IRQn_Type IRQn = IR_RECEIVE_TIM_IRQn;
 
 	NVIC_DisableIRQ(IRQn);
 	LL_TIM_DeInit(TIMx);
@@ -98,8 +98,8 @@ static inline void timerConfigInputCaptureForReceive(void)
 // Timer reconfiguration for periodic mode
 static inline void timerConfigPeriodicForReceive(void)
 {
-	TIM_TypeDef *TIMx = TIM2;
-	IRQn_Type IRQn = TIM2_IRQn;
+	TIM_TypeDef *TIMx = IR_RECEIVE_TIM;
+	IRQn_Type IRQn = IR_RECEIVE_TIM_IRQn;
 
 	NVIC_DisableIRQ(IRQn);
 	LL_TIM_DeInit(TIMx);

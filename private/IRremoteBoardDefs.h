@@ -136,11 +136,17 @@
 
 //---------------------------------------------------------
 
-#define TIMER_ENABLE_SEND_PWM       LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH1) // we must use channel here not pin number
-#define TIMER_DISABLE_SEND_PWM      LL_TIM_CC_DisableChannel(TIM2, LL_TIM_CHANNEL_CH1)
+#define IR_SEND_TIM                 TIM2
+#define IR_SEND_TIM_IRQn            TIM2_IRQn
 
-#define TIMER_ENABLE_RECEIVE_INTR   NVIC_EnableIRQ(TIM2_IRQn)
-#define TIMER_DISABLE_RECEIVE_INTR  NVIC_DisableIRQ(TIM2_IRQn)
+#define IR_RECEIVE_TIM              TIM2
+#define IR_RECEIVE_TIM_IRQn         TIM2_IRQn
+
+#define TIMER_ENABLE_SEND_PWM       LL_TIM_CC_EnableChannel(IR_SEND_TIM, LL_TIM_CHANNEL_CH1)
+#define TIMER_DISABLE_SEND_PWM      LL_TIM_CC_DisableChannel(IR_SEND_TIM, LL_TIM_CHANNEL_CH1)
+
+#define TIMER_ENABLE_RECEIVE_INTR   NVIC_EnableIRQ(IR_RECEIVE_TIM_IRQn)
+#define TIMER_DISABLE_RECEIVE_INTR  NVIC_DisableIRQ(IR_RECEIVE_TIM_IRQn)
 
 void timerConfigForReceive(void);
 void timerConfigForSend(uint16_t aFrequencyKHz);
