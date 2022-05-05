@@ -160,34 +160,19 @@ bool decode(decode_results *results) {
 //
 #ifdef USE_DEFAULT_ENABLE_IR_IN
 void enableIRIn(void) {
-    // the interrupt Service Routine fires every 50 uS
-    // noInterrupts();
-    
-    // Setup pulse clock timer interrupt
-    // Prescale /8 (16M/8 = 0.5 microseconds per tick)
-    // Therefore, the timer interval can range from 0.5 to 128 microseconds
-    // Depending on the reset value (255 to 0)
+    // Setup timer mode and interrupts
+    TIMER_DISABLE_RECEIVE_INTR;
     timerConfigForReceive();
-
-    // Timer2 Overflow Interrupt Enable
     TIMER_ENABLE_RECEIVE_INTR;
-
-    TIMER_RESET_INTR_PENDING;
-
-    // interrupts();
 
     // Initialize state machine state
     irparams.rcvstate = IR_REC_STATE_IDLE;
-    // irparams.rawlen = 0; // not required
-
-    // Set pin modes
-    // pinMode(irparams.recvpin, INPUT);
+    irparams.rawlen = 0;
 }
 
 void disableIRIn(void) {
     TIMER_DISABLE_RECEIVE_INTR;
 }
-
 #endif // USE_DEFAULT_ENABLE_IR_IN
 
 //+=============================================================================
@@ -226,7 +211,7 @@ bool available(decode_results *results) {
 //
 void resume(void) {
     irparams.rcvstate = IR_REC_STATE_IDLE;
-//    irparams.rawlen = 0; // not required
+    irparams.rawlen = 0;
 }
 
 # if DECODE_HASH

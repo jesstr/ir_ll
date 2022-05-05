@@ -81,83 +81,163 @@ int MATCH_SPACE(uint16_t measured_ticks, unsigned int desired_us) {
 }
 
 //+=============================================================================
-// Interrupt Service Routine - Fires every 50uS
-// TIMER2 interrupt code to collect raw data.
+// Receive timer interrupt handlers to collect raw data.
 // Widths of alternating SPACE, MARK are recorded in rawbuf.
-// Recorded in ticks of 50uS [microseconds, 0.000050 seconds]
 // 'rawlen' counts the number of entries recorded so far.
 // First entry is the SPACE between transmissions.
 // As soon as a the first [SPACE] entry gets long:
 //   Ready is set; State switches to IDLE; Timing of SPACE continues.
 // As soon as first MARK arrives:
 //   Gap width is recorded; Ready is cleared; New logging starts
+
+#ifdef USE_TIMER_IC_MODE
+// Timer Input Capture mode IRQ handler.
+// Fires on Rising edge, Falling edge and Overflow
 //
-void IR_PeriodicTimerHandler(void) {
-    TIMER_RESET_INTR_PENDING; // reset timer interrupt flag if required
+static inline void timerInputCaptureHandler(void) {
+    TIM_TypeDef *TIMx = TIM2;
 
-    // Read if IR Receiver -> SPACE [xmt LED off] or a MARK [xmt LED on]
-    uint8_t irdata = (uint8_t)IR_READPIN;
-
-    irparams.timer++;  // One more 50uS tick
     if (irparams.rawlen >= RAW_BUFFER_LENGTH) {
         // Flag up a read overflow; Stop the State Machine
         irparams.overflow = true;
         irparams.rcvstate = IR_REC_STATE_STOP;
     }
 
-    /*
-     * Due to a ESP32 compiler bug https://github.com/espressif/esp-idf/issues/1552 no switch statements are possible for ESP32
-     * So we change the code to if / else if
-     */
-//    switch (irparams.rcvstate) {
-    //......................................................................
-    if (irparams.rcvstate == IR_REC_STATE_IDLE) { // In the middle of a gap
-        if (irdata == MARK) {\
-            if (irparams.timer < GAP_TICKS) {  // Not big enough to be a gap.
-                irparams.timer = 0;
-            } else {
-                // Gap just ended; Record gap duration; Start recording transmission
-                // Initialize all state machine variables
-                irparams.overflow = false;
-                irparams.rawlen = 0;
-                irparams.rawbuf[irparams.rawlen++] = irparams.timer;
-                irparams.timer = 0;
-                irparams.rcvstate = IR_REC_STATE_MARK;
-            }
+    if (LL_TIM_IsActiveFlag_CC1(TIMx)) {
+        // Falling edge
+        uint32_t ccr = LL_TIM_IC_GetCaptureCH1(TIMx) / MICROS_PER_TICK;
+
+        if (irparams.rcvstate == IR_REC_STATE_IDLE) {
+            irparams.overflow = false;
+            irparams.rawlen = 0;
         }
-    } else if (irparams.rcvstate == IR_REC_STATE_MARK) {  // Timing Mark
-        if (irdata == SPACE) {   // Mark ended; Record time
-            irparams.rawbuf[irparams.rawlen++] = irparams.timer;
-            irparams.timer = 0;
+        if (irparams.rcvstate != IR_REC_STATE_STOP) {
+            irparams.rawbuf[irparams.rawlen++] = ccr;
+            irparams.rcvstate = IR_REC_STATE_MARK;
+        }
+        LL_TIM_SetCounter(TIMx, 0);
+        LL_TIM_ClearFlag_CC1(TIMx);
+        LL_TIM_ClearFlag_UPDATE(TIMx);
+        LL_TIM_EnableIT_UPDATE(TIMx);
+    }
+    else if (LL_TIM_IsActiveFlag_CC2(TIMx)) {
+        // Rising edge
+        if (irparams.rcvstate != IR_REC_STATE_STOP) {
+            irparams.rawbuf[irparams.rawlen++] = LL_TIM_IC_GetCaptureCH2(TIMx) / MICROS_PER_TICK;
             irparams.rcvstate = IR_REC_STATE_SPACE;
         }
-    } else if (irparams.rcvstate == IR_REC_STATE_SPACE) {  // Timing Space
-        if (irdata == MARK) {  // Space just ended; Record time
-            irparams.rawbuf[irparams.rawlen++] = irparams.timer;
-            irparams.timer = 0;
-            irparams.rcvstate = IR_REC_STATE_MARK;
-
-        } else if (irparams.timer > GAP_TICKS) {  // Space
+        LL_TIM_SetCounter(TIMx, 0);
+        LL_TIM_ClearFlag_CC2(TIMx);
+    }
+    else if (LL_TIM_IsActiveFlag_UPDATE(TIMx)) {
+        if (irparams.rcvstate != IR_REC_STATE_IDLE) {
             // A long Space, indicates gap between codes
             // Flag the current code as ready for processing
             // Switch to STOP
-            // Don't reset timer; keep counting Space width
             irparams.rcvstate = IR_REC_STATE_STOP;
+            LL_TIM_DisableIT_UPDATE(TIMx);
         }
-    } else if (irparams.rcvstate == IR_REC_STATE_STOP) {  // Waiting; Measuring Gap
-        if (irdata == MARK) {
-            irparams.timer = 0;  // Reset gap timer
-        }
+        LL_TIM_ClearFlag_UPDATE(TIMx);
     }
 
 #ifdef BLINKLED
     // If requested, flash LED while receiving IR data
     if (irparams.blinkflag) {
-        if (irdata == MARK) {
-            BLINKLED_ON();   // if no user defined LED pin, turn default LED pin for the hardware on
+        if (irparams.rcvstate == IR_REC_STATE_MARK) {
+            BLINKLED_ON();
         } else {
-            BLINKLED_OFF();   // if no user defined LED pin, turn default LED pin for the hardware on
+            BLINKLED_OFF();
         }
     }
 #endif // BLINKLED
+}
+
+#else
+
+// Timer periodic mode IRQ handler.
+// Fires every 50uS.
+// Recorded in ticks of 50uS [microseconds, 0.000050 seconds]
+//
+static inline void timerPeriodicHandler(void) {
+    TIM_TypeDef *TIMx = TIM2;
+
+    if (LL_TIM_IsActiveFlag_UPDATE(TIMx)) {
+        LL_TIM_ClearFlag_UPDATE(TIMx);
+        
+        // Read if IR Receiver -> SPACE [xmt LED off] or a MARK [xmt LED on]
+        uint8_t irdata = (uint8_t)IR_READPIN;
+
+        irparams.timer++;  // One more 50uS tick
+        if (irparams.rawlen >= RAW_BUFFER_LENGTH) {
+            // Flag up a read overflow; Stop the State Machine
+            irparams.overflow = true;
+            irparams.rcvstate = IR_REC_STATE_STOP;
+        }
+
+        /*
+        * Due to a ESP32 compiler bug https://github.com/espressif/esp-idf/issues/1552 no switch statements are possible for ESP32
+        * So we change the code to if / else if
+        */
+    //    switch (irparams.rcvstate) {
+        //......................................................................
+        if (irparams.rcvstate == IR_REC_STATE_IDLE) { // In the middle of a gap
+            if (irdata == MARK) {\
+                if (irparams.timer < GAP_TICKS) {  // Not big enough to be a gap.
+                    irparams.timer = 0;
+                } else {
+                    // Gap just ended; Record gap duration; Start recording transmission
+                    // Initialize all state machine variables
+                    irparams.overflow = false;
+                    irparams.rawlen = 0;
+                    irparams.rawbuf[irparams.rawlen++] = irparams.timer;
+                    irparams.timer = 0;
+                    irparams.rcvstate = IR_REC_STATE_MARK;
+                }
+            }
+        } else if (irparams.rcvstate == IR_REC_STATE_MARK) {  // Timing Mark
+            if (irdata == SPACE) {   // Mark ended; Record time
+                irparams.rawbuf[irparams.rawlen++] = irparams.timer;
+                irparams.timer = 0;
+                irparams.rcvstate = IR_REC_STATE_SPACE;
+            }
+        } else if (irparams.rcvstate == IR_REC_STATE_SPACE) {  // Timing Space
+            if (irdata == MARK) {  // Space just ended; Record time
+                irparams.rawbuf[irparams.rawlen++] = irparams.timer;
+                irparams.timer = 0;
+                irparams.rcvstate = IR_REC_STATE_MARK;
+
+            } else if (irparams.timer > GAP_TICKS) {  // Space
+                // A long Space, indicates gap between codes
+                // Flag the current code as ready for processing
+                // Switch to STOP
+                // Don't reset timer; keep counting Space width
+                irparams.rcvstate = IR_REC_STATE_STOP;
+            }
+        } else if (irparams.rcvstate == IR_REC_STATE_STOP) {  // Waiting; Measuring Gap
+            if (irdata == MARK) {
+                irparams.timer = 0;  // Reset gap timer
+            }
+        }
+
+    #ifdef BLINKLED
+        // If requested, flash LED while receiving IR data
+        if (irparams.blinkflag) {
+            if (irdata == MARK) {
+                BLINKLED_ON();   // if no user defined LED pin, turn default LED pin for the hardware on
+            } else {
+                BLINKLED_OFF();   // if no user defined LED pin, turn default LED pin for the hardware on
+            }
+        }
+    #endif // BLINKLED
+    }
+}
+#endif
+
+
+void IR_TimerIRQHandler(void) {
+#ifdef USE_TIMER_IC_MODE
+    timerInputCaptureHandler();
+#else
+    timerPeriodicHandler();
+#endif // USE_TIMER_IC_MODE
 }

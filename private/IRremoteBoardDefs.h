@@ -49,6 +49,12 @@
 #define USE_DEFAULT_ENABLE_IR_OUT
 
 /**
+ * Defined if Input Capture mode for receive timer should be used.
+ * Undefine for default 50us periodic mode.
+ */
+#define USE_TIMER_IC_MODE
+
+/**
  * Duty cycle in percent for sent signals.
  */
 #if ! defined(IR_SEND_DUTY_CYCLE)
@@ -111,20 +117,25 @@
 #ifndef IRSEND_Pin
 #define IRSEND_Pin          LL_GPIO_PIN_2
 #endif
+#ifndef IRSEND_GPIO_AF
+#define IRSEND_GPIO_AF      LL_GPIO_AF_2
+#endif
 #define IR_SENDPIN_ON       (LL_GPIO_SetOutputPin(IRSEND_GPIO_Port, IRSEND_Pin))
 #define IR_SENDPIN_OFF      (LL_GPIO_ResetOutputPin(IRSEND_GPIO_Port, IRSEND_Pin))
 
-#ifndef IRRECIVE_GPIO_Port
-#define IRRECIVE_GPIO_Port  GPIOA
+#ifndef IRRECEIVE_GPIO_Port
+#define IRRECEIVE_GPIO_Port GPIOA
 #endif
-#ifndef IRRECIVE_Pin
-#define IRRECIVE_Pin        LL_GPIO_PIN_1
+#ifndef IRRECEIVE_Pin
+#define IRRECEIVE_Pin       LL_GPIO_PIN_1
 #endif
-#define IR_READPIN          (LL_GPIO_IsInputPinSet(IRRECIVE_GPIO_Port, IRRECIVE_Pin))
+#ifndef IRRECEIVE_GPIO_AF
+#define IRRECEIVE_GPIO_AF   LL_GPIO_AF_2
+#endif
+#define IR_READPIN          (LL_GPIO_IsInputPinSet(IRRECEIVE_GPIO_Port, IRRECEIVE_Pin))
 
 //---------------------------------------------------------
 
-#define TIMER_RESET_INTR_PENDING    LL_TIM_ClearFlag_UPDATE(TIM2)
 #define TIMER_ENABLE_SEND_PWM       LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH1) // we must use channel here not pin number
 #define TIMER_DISABLE_SEND_PWM      LL_TIM_CC_DisableChannel(TIM2, LL_TIM_CHANNEL_CH1)
 
@@ -133,7 +144,7 @@
 
 void timerConfigForReceive(void);
 void timerConfigForSend(uint16_t aFrequencyKHz);
-void IR_PeriodicTimerHandler(void);
+void IR_TimerIRQHandler(void);
 
 //---------------------------------------------------------
 
