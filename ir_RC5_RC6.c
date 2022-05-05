@@ -163,13 +163,13 @@ bool decodeRC5(decode_results *results) {
     }
 
     // Get start bits
-    if (getRClevel(&results, &offset, &used, RC5_T1) != MARK) {
+    if (getRClevel(results, &offset, &used, RC5_T1) != MARK) {
         return false;
     }
-    if (getRClevel(&results, &offset, &used, RC5_T1) != SPACE) {
+    if (getRClevel(results, &offset, &used, RC5_T1) != SPACE) {
         return false;
     }
-    if (getRClevel(&results, &offset, &used, RC5_T1) != MARK) {
+    if (getRClevel(results, &offset, &used, RC5_T1) != MARK) {
         return false;
     }
 
@@ -177,8 +177,8 @@ bool decodeRC5(decode_results *results) {
      * Get data bits - MSB first
      */
     for (nbits = 0; offset < results->rawlen; nbits++) {
-        int levelA = getRClevel(&results, &offset, &used, RC5_T1);
-        int levelB = getRClevel(&results, &offset, &used, RC5_T1);
+        int levelA = getRClevel(results, &offset, &used, RC5_T1);
+        int levelB = getRClevel(results, &offset, &used, RC5_T1);
 
         if ((levelA == SPACE) && (levelB == MARK)) {
             data = (data << 1) | 1;
@@ -267,28 +267,28 @@ bool decodeRC6(decode_results *results) {
     offset++;
 
     // Get start bit (1)
-    if (getRClevel(&results, &offset, &used, RC6_T1) != MARK) {
+    if (getRClevel(results, &offset, &used, RC6_T1) != MARK) {
         return false;
     }
-    if (getRClevel(&results, &offset, &used, RC6_T1) != SPACE) {
+    if (getRClevel(results, &offset, &used, RC6_T1) != SPACE) {
         return false;
     }
 
     for (nbits = 0; offset < results->rawlen; nbits++) {
         int levelA, levelB;  // Next two levels
 
-        levelA = getRClevel(&results, &offset, &used, RC6_T1);
+        levelA = getRClevel(results, &offset, &used, RC6_T1);
         if (nbits == 3) {
             // T bit is double wide; make sure second half matches
-            if (levelA != getRClevel(&results, &offset, &used, RC6_T1)) {
+            if (levelA != getRClevel(results, &offset, &used, RC6_T1)) {
                 return false;
             }
         }
 
-        levelB = getRClevel(&results, &offset, &used, RC6_T1);
+        levelB = getRClevel(results, &offset, &used, RC6_T1);
         if (nbits == 3) {
             // T bit is double wide; make sure second half matches
-            if (levelB != getRClevel(&results, &offset, &used, RC6_T1)) {
+            if (levelB != getRClevel(results, &offset, &used, RC6_T1)) {
                 return false;
             }
         }
