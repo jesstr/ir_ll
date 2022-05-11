@@ -135,9 +135,9 @@ static inline void timerInputCaptureHandler(void) {
             // Flag the current code as ready for processing
             // Switch to STOP
             irparams.rcvstate = IR_REC_STATE_STOP;
-            LL_TIM_DisableIT_UPDATE(TIMx);
         }
         LL_TIM_ClearFlag_UPDATE(TIMx);
+        LL_TIM_DisableIT_UPDATE(TIMx);
     }
 
 #ifdef BLINKLED
