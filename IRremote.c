@@ -234,10 +234,14 @@ static inline void timerPeriodicHandler(void) {
 #endif
 
 
-void IR_TimerIRQHandler(void) {
+bool IR_TimerIRQHandler(void) {
 #ifdef USE_TIMER_IC_MODE
     timerInputCaptureHandler();
 #else
     timerPeriodicHandler();
 #endif // USE_TIMER_IC_MODE
+    if (irparams.rcvstate == IR_REC_STATE_STOP) {
+        return true;
+    }
+    return false;
 }

@@ -23,6 +23,8 @@
 #ifndef IRremoteBoardDefs_h
 #define IRremoteBoardDefs_h
 
+#include <stdint.h>
+#include <stdbool.h>
 #include "gpio.h"
 #include "delay.h"
 #include "cmsis_os.h"
@@ -150,7 +152,7 @@
 
 void timerConfigForReceive(void);
 void timerConfigForSend(uint16_t aFrequencyKHz);
-void IR_TimerIRQHandler(void);
+bool IR_TimerIRQHandler(void);
 
 //---------------------------------------------------------
 
