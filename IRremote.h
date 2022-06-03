@@ -127,7 +127,7 @@ typedef enum {
     SHARP_ALT,
     SONY,
     WHYNTER,
-} decode_type_t;
+} ir_decode_type_t;
 
 /**
  * Comment this out for lots of lovely debug output.
@@ -170,7 +170,7 @@ int MATCH_SPACE(uint16_t measured_ticks, unsigned int desired_us);
  * Results returned from the decoder
  */
 typedef struct {
-    decode_type_t decode_type;  ///< UNKNOWN, NEC, SONY, RC5, ...
+    ir_decode_type_t decode_type;  ///< UNKNOWN, NEC, SONY, RC5, ...
     uint16_t address;           ///< Used by Panasonic & Sharp6 NEC_standard [16-bits]
     uint32_t value;             ///< Decoded value / command [max 32-bits]
     uint16_t bits;              ///< Number of bits in decoded value
@@ -181,148 +181,148 @@ typedef struct {
     uint16_t *rawbuf;           ///< Raw intervals in 50uS ticks
     uint16_t rawlen;            ///< Number of records in rawbuf
     bool overflow;              ///< true if IR raw code too long
-} decode_results;
+} ir_decode_results;
 
 /**
  * DEPRECATED
  * Decoded value for NEC and others when a repeat code is received
- * Use Flag decode_results.isRepeat (see above) instead
+ * Use Flag ir_decode_results.isRepeat (see above) instead
  */
 #define REPEAT 0xFFFFFFFF
 
 
 /**
  * Attempt to decode the recently receive IR signal
- * @param results decode_results instance returning the decode, if any.
+ * @param results ir_decode_results instance returning the decode, if any.
  * @return success of operation.
  */
-bool decode(decode_results *results);
+bool IR_decode(ir_decode_results *results);
 
 /**
  * Enable IR reception.
  */
-void enableIRIn(void);
+void IR_enableIRIn(void);
 
 /**
  * Disable IR reception.
  */
-void disableIRIn(void);
+void IR_disableIRIn(void);
 
 /**
  * Enable/disable blinking of BLINKLED pin
  */
-void blink(bool blinkflag);
+void IR_blink(bool blinkflag);
 
 /**
  * Returns status of reception
  * @return true if no reception is on-going.
  */
-bool isIdle(void);
+bool IR_isIdle(void);
 
 /**
- * Returns status of reception and copies IR-data to decode_results buffer if true.
+ * Returns status of reception and copies IR-data to ir_decode_results buffer if true.
  * @return true if data is available.
  */
-bool available(decode_results *results);
+bool IR_available(ir_decode_results *results);
 
 /**
  * Called to re-enable IR reception.
  */
-void resume(void);
+void IR_resume(void);
 
-const char* getProtocolString(decode_results *results);
-void printResultShort(decode_results *results);
-void printIRResultRaw(decode_results *results);
-void printIRResultRawFormatted(decode_results *results);
-void printIRResultAsCArray(decode_results *results);
-void printIRResultAsCVariables(decode_results *results);
+const char* IR_getProtocolString(ir_decode_results *results);
+void IR_printResultShort(ir_decode_results *results);
+void IR_printIRResultRaw(ir_decode_results *results);
+void IR_printIRResultRawFormatted(ir_decode_results *results);
+void IR_printIRResultAsCArray(ir_decode_results *results);
+void IR_printIRResultAsCVariables(ir_decode_results *results);
 
 /**
  * Print the result (second argument) as Pronto Hex on the Stream supplied as argument.
  * @param stream The Stream on which to write, often Serial
- * @param results the decode_results as delivered from irrecv.decode.
+ * @param results the ir_decode_results as delivered from irrecv.decode.
  * @param frequency Modulation frequency in Hz. Often 38000Hz.
  */
-void dumpPronto(decode_results *results, unsigned int frequency);
-void printIRResultAsPronto(decode_results *results, unsigned int frequency);
+void IR_dumpPronto(ir_decode_results *results, unsigned int frequency);
+void IR_printIRResultAsPronto(ir_decode_results *results, unsigned int frequency);
 
-bool decodePulseDistanceData(decode_results *results, uint8_t aNumberOfBits, uint8_t aStartOffset, unsigned int aBitMarkMicros,
+bool IR_decodePulseDistanceData(ir_decode_results *results, uint8_t aNumberOfBits, uint8_t aStartOffset, unsigned int aBitMarkMicros,
         unsigned int aOneSpaceMicros, unsigned int aZeroSpaceMicros, bool aMSBfirst);
 
 //......................................................................
 #if DECODE_RC5
 /**
  * Try to decode the recently received IR signal as an RC5 signal-
- * @param results decode_results instance returning the decode, if any.
+ * @param results ir_decode_results instance returning the decode, if any.
  * @return Success of the operation.
  */
-bool decodeRC5(decode_results *results);
+bool IR_decodeRC5(ir_decode_results *results);
 #endif
 #if DECODE_RC6
-bool decodeRC6(decode_results *results);
+bool IR_decodeRC6(ir_decode_results *results);
 #endif
 //......................................................................
 #if DECODE_NEC
-bool decodeNEC(decode_results *results);
+bool IR_decodeNEC(ir_decode_results *results);
 #endif
 #if DECODE_NEC_STANDARD
-bool decodeNECStandard(decode_results *results);
+bool IR_decodeNECStandard(ir_decode_results *results);
 #endif
 
 //......................................................................
 #if DECODE_SONY
-bool decodeSony(decode_results *results);
+bool IR_decodeSony(ir_decode_results *results);
 #endif
 //......................................................................
 #if DECODE_PANASONIC
-bool decodePanasonic(decode_results *results);
+bool IR_decodePanasonic(ir_decode_results *results);
 #endif
 //......................................................................
 #if DECODE_JVC
-bool decodeJVC(decode_results *results);
+bool IR_decodeJVC(ir_decode_results *results);
 #endif
 //......................................................................
 #if DECODE_SAMSUNG
-bool decodeSAMSUNG(decode_results *results);
+bool IR_decodeSAMSUNG(ir_decode_results *results);
 #endif
 //......................................................................
 #if DECODE_WHYNTER
-bool decodeWhynter(decode_results *results);
+bool IR_decodeWhynter(ir_decode_results *results);
 #endif
 //......................................................................
 #if DECODE_LG
-bool decodeLG(decode_results *results);
+bool IR_decodeLG(ir_decode_results *results);
 #endif
 //......................................................................
 #if DECODE_SANYO
-bool decodeSanyo(decode_results *results);
+bool IR_decodeSanyo(ir_decode_results *results);
 #endif
 //......................................................................
 #if DECODE_DISH
-    bool  decodeDish (decode_results *results) ; // NOT WRITTEN
+    bool  decodeDish (ir_decode_results *results) ; // NOT WRITTEN
 #endif
 //......................................................................
 #if DECODE_SHARP
-bool decodeSharp(decode_results *results);
+bool IR_decodeSharp(ir_decode_results *results);
 #endif
 #if DECODE_SHARP_ALT
-bool decodeSharpAlt(decode_results *results);
+bool IR_decodeSharpAlt(ir_decode_results *results);
 #endif
 //......................................................................
 #if DECODE_DENON
-bool decodeDenon(decode_results *results);
+bool IR_decodeDenon(ir_decode_results *results);
 #endif
 //......................................................................
 #if DECODE_LEGO_PF
-    bool  decodeLegoPowerFunctions (decode_results *results) ;
+bool IR_decodeLegoPowerFunctions(ir_decode_results *results);
 #endif
 //......................................................................
 #if DECODE_BOSEWAVE
-bool decodeBoseWave(decode_results *results);
+bool IR_decodeBoseWave(ir_decode_results *results);
 #endif
 //......................................................................
 #if DECODE_MAGIQUEST
-bool decodeMagiQuest(decode_results *results);
+bool IR_decodeMagiQuest(ir_decode_results *results);
 #endif
 
 /****************************************************
@@ -347,41 +347,41 @@ bool decodeMagiQuest(decode_results *results);
  */
 //#define USE_SPIN_WAIT
 
-void enableIROut(int khz);
-void sendPulseDistanceWidthData(unsigned int aOneMarkMicros, unsigned int aOneSpaceMicros, unsigned int aZeroMarkMicros,
+void IR_enableIROut(int khz);
+void IR_sendPulseDistanceWidthData(unsigned int aOneMarkMicros, unsigned int aOneSpaceMicros, unsigned int aZeroMarkMicros,
         unsigned int aZeroSpaceMicros, unsigned long aData, uint8_t aNumberOfBits, bool aMSBfirst);
 void mark(uint16_t timeMicros);
-void mark_long(uint32_t timeMicros);
+void IR_mark_long(uint32_t timeMicros);
 void space(uint16_t timeMicros);
-void space_long(uint32_t timeMicros);
-void sendRaw(const unsigned int buf[], unsigned int len, unsigned int hz);
-void sendRaw_P(const unsigned int buf[], unsigned int len, unsigned int hz);
+void IR_space_long(uint32_t timeMicros);
+void IR_sendRaw(const unsigned int buf[], unsigned int len, unsigned int hz);
+void IR_sendRaw_P(const unsigned int buf[], unsigned int len, unsigned int hz);
 
 //......................................................................
 #if SEND_RC5
-void sendRC5(uint32_t data, uint8_t nbits);
-void sendRC5ext(uint8_t addr, uint8_t cmd, bool toggle);
+void IR_sendRC5(uint32_t data, uint8_t nbits);
+void IR_sendRC5ext(uint8_t addr, uint8_t cmd, bool toggle);
 #endif
 #if SEND_RC6
-void sendRC6(uint32_t data, uint8_t nbits);
+void IR_sendRC6(uint32_t data, uint8_t nbits);
 #endif
 //......................................................................
 #if SEND_NEC || SEND_NEC_STANDARD
-void sendNECRepeat();
+void IR_sendNECRepeat();
 #endif
 #if SEND_NEC
-void sendNEC(uint32_t data, uint8_t nbits, bool repeat);
+void IR_sendNEC(uint32_t data, uint8_t nbits, bool repeat);
 #endif
 #if SEND_NEC_STANDARD
-void sendNECStandard(uint16_t aAddress, uint8_t aCommand, uint8_t aNumberOfRepeats);
+void IR_sendNECStandard(uint16_t aAddress, uint8_t aCommand, uint8_t aNumberOfRepeats);
 #endif
 //......................................................................
 #if SEND_SONY
-void sendSony(unsigned long data, int nbits);
+void IR_sendSony(unsigned long data, int nbits);
 #endif
 //......................................................................
 #if SEND_PANASONIC
-void sendPanasonic(unsigned int address, unsigned long data);
+void IR_sendPanasonic(unsigned int address, unsigned long data);
 #endif
 //......................................................................
 #if SEND_JVC
@@ -389,19 +389,19 @@ void sendPanasonic(unsigned int address, unsigned long data);
 // The JVC protocol repeats by skipping the header.
 // To send a JVC repeat signal, send the original code value
 //   and set 'repeat' to true
-void sendJVC(unsigned long data, int nbits, bool repeat);
+void IR_sendJVC(unsigned long data, int nbits, bool repeat);
 #endif
 //......................................................................
 #if SEND_SAMSUNG
-void sendSAMSUNG(unsigned long data, int nbits);
+void IR_sendSAMSUNG(unsigned long data, int nbits);
 #endif
 //......................................................................
 #if SEND_WHYNTER
-void sendWhynter(unsigned long data, int nbits);
+void IR_sendWhynter(unsigned long data, int nbits);
 #endif
 //......................................................................
 #if SEND_LG
-void sendLG(unsigned long data, int nbits);
+void IR_sendLG(unsigned long data, int nbits);
 #endif
 //......................................................................
 #if SEND_SANYO
@@ -409,32 +409,32 @@ void sendLG(unsigned long data, int nbits);
 #endif
 //......................................................................
 #if SEND_DISH
-void sendDISH(unsigned long data, int nbits);
+void IR_sendDISH(unsigned long data, int nbits);
 #endif
 //......................................................................
 #if SEND_SHARP
-void sendSharpRaw(unsigned long data, int nbits);
-void sendSharp(unsigned int address, unsigned int command);
+void IR_sendSharpRaw(unsigned long data, int nbits);
+void IR_sendSharp(unsigned int address, unsigned int command);
 #endif
 #if SEND_SHARP_ALT
-void sendSharpAltRaw(unsigned int data, int nbits);
-void sendSharpAlt(uint8_t address, uint8_t command);
+void IR_sendSharpAltRaw(unsigned int data, int nbits);
+void IR_sendSharpAlt(uint8_t address, uint8_t command);
 #endif
 //......................................................................
 #if SEND_DENON
-void sendDenon(unsigned long data, int nbits);
+void IR_sendDenon(unsigned long data, int nbits);
 #endif
 //......................................................................
 #if SEND_LEGO_PF
-void sendLegoPowerFunctions(uint16_t data, bool repeat);
+void IR_sendLegoPowerFunctions(uint16_t data, bool repeat);
 #endif
 //......................................................................
 #if SEND_BOSEWAVE
-void sendBoseWave(unsigned char code);
+void IR_sendBoseWave(unsigned char code);
 #endif
 //......................................................................
 #if SEND_MAGIQUEST
-void sendMagiQuest(unsigned long wand_id, unsigned int magnitude);
+void IR_sendMagiQuest(unsigned long wand_id, unsigned int magnitude);
 #endif
 
 /**
@@ -454,9 +454,9 @@ void sendMagiQuest(unsigned long wand_id, unsigned int magnitude);
  * @param str C type string (null terminated) containing a Pronto Hex representation.
  * @param times Number of times to send the signal.
  */
-void sendProntoStr(const char* str, unsigned int times);
+void IR_sendProntoStr(const char* str, unsigned int times);
 
-void sendPronto(const uint16_t* data, unsigned int length, unsigned int times);
+void IR_sendPronto(const uint16_t* data, unsigned int length, unsigned int times);
 
 #if defined(USE_SOFT_SEND_PWM) || defined(USE_NO_SEND_PWM)
 

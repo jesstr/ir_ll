@@ -103,7 +103,7 @@ void sendBoseWave(unsigned char code) {
 
 //+=============================================================================
 #if DECODE_BOSEWAVE
-bool decodeBoseWave(decode_results *results) {
+bool IR_decodeBoseWave(ir_decode_results *results) {
     unsigned char command = 0;      // Decoded command
     unsigned char complement = 0;   // Decoded command complement
 

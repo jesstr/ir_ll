@@ -33,7 +33,7 @@
 // (This is to avoid negative logic, ! DONT_... is just awkward.)
 
 /**
- * Defined if the standard enableIRIn function should be used.
+ * Defined if the standard IR_enableIRIn function should be used.
  * Undefine for boards supplying their own.
  */
 #define USE_DEFAULT_ENABLE_IR_IN
@@ -45,7 +45,7 @@
 #define SENDING_SUPPORTED
 
 /**
- * Defined if the standard enableIROut function should be used.
+ * Defined if the standard IR_enableIROut function should be used.
  * Undefine for boards supplying their own.
  */
 #define USE_DEFAULT_ENABLE_IR_OUT
@@ -150,8 +150,8 @@
 #define TIMER_ENABLE_RECEIVE_INTR   NVIC_EnableIRQ(IR_RECEIVE_TIM_IRQn)
 #define TIMER_DISABLE_RECEIVE_INTR  NVIC_DisableIRQ(IR_RECEIVE_TIM_IRQn)
 
-void timerConfigForReceive(void);
-void timerConfigForSend(uint16_t aFrequencyKHz);
+void IR_timerConfigForReceive(void);
+void IR_timerConfigForSend(uint16_t aFrequencyKHz);
 bool IR_TimerIRQHandler(void);
 
 //---------------------------------------------------------

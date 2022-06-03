@@ -50,7 +50,7 @@ void sendSony(unsigned long data, int nbits) {
 
 //+=============================================================================
 #if DECODE_SONY
-bool decodeSony(decode_results *results) {
+bool IR_decodeSony(ir_decode_results *results) {
     long data = 0;
     unsigned int offset = 0;  // Dont skip first space, check its size
 

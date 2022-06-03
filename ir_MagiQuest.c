@@ -75,7 +75,7 @@ void sendMagiQuest(unsigned long wand_id, unsigned int magnitude) {
 //+=============================================================================
 //
 #if DECODE_MAGIQUEST
-bool decodeMagiQuest(decode_results *results) {
+bool IR_decodeMagiQuest(ir_decode_results *results) {
     magiquest_t data;  // Somewhere to build our code
     unsigned int offset = 1;  // Skip the gap reading
 

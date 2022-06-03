@@ -51,7 +51,7 @@ void sendDenon(unsigned long data, int nbits) {
 //+=============================================================================
 //
 #if DECODE_DENON
-bool decodeDenon(decode_results *results) {
+bool IR_decodeDenon(ir_decode_results *results) {
     int offset = 1;  // Skip the gap reading
 
     // Check we have the right amount of data
@@ -71,7 +71,7 @@ bool decodeDenon(decode_results *results) {
     offset++;
 
     // Read the bits in
-    if (!decodePulseDistanceData(results, DENON_BITS, offset, DENON_BIT_MARK,
+    if (!IR_decodePulseDistanceData(results, DENON_BITS, offset, DENON_BIT_MARK,
         DENON_ONE_SPACE, DENON_ZERO_SPACE, true)) {
         return false;
     }

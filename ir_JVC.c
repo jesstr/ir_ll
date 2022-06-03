@@ -50,7 +50,7 @@ void sendJVC(unsigned long data, int nbits, bool repeat) {
 
 //+=============================================================================
 #if DECODE_JVC
-bool decodeJVC(decode_results *results) {
+bool IR_decodeJVC(ir_decode_results *results) {
     int offset = 1; // Skip first space
 
     // Check for repeat
@@ -80,7 +80,7 @@ bool decodeJVC(decode_results *results) {
     }
     offset++;
 
-    if (!decodePulseDistanceData(results, JVC_BITS, offset, JVC_BIT_MARK,
+    if (!IR_decodePulseDistanceData(results, JVC_BITS, offset, JVC_BIT_MARK,
         JVC_ONE_SPACE, JVC_ZERO_SPACE, true)) {
         return false;
     }

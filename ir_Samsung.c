@@ -40,7 +40,7 @@ void sendSAMSUNG(unsigned long data, int nbits) {
 // SAMSUNGs have a repeat only 4 items long
 //
 #if DECODE_SAMSUNG
-bool decodeSAMSUNG(decode_results *results) {
+bool IR_decodeSAMSUNG(ir_decode_results *results) {
     int offset = 1;  // Skip first space
 
     // Initial mark
@@ -68,7 +68,7 @@ bool decodeSAMSUNG(decode_results *results) {
     }
     offset++;
 
-    if (!decodePulseDistanceData(results, SAMSUNG_BITS, offset, SAMSUNG_BIT_MARK,
+    if (!IR_decodePulseDistanceData(results, SAMSUNG_BITS, offset, SAMSUNG_BIT_MARK,
         SAMSUNG_ONE_SPACE, SAMSUNG_ZERO_SPACE, true)) {
         return false;
     }

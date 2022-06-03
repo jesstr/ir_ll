@@ -50,7 +50,7 @@ void sendWhynter(unsigned long data, int nbits) {
 
 //+=============================================================================
 #if DECODE_WHYNTER
-bool decodeWhynter(decode_results *results) {
+bool IR_decodeWhynter(ir_decode_results *results) {
     int offset = 1;  // skip initial space
 
     // Check we have the right amount of data +5 for (start bit + header) mark and space + stop bit mark
@@ -80,7 +80,7 @@ bool decodeWhynter(decode_results *results) {
     }
     offset++;
 
-    if (!decodePulseDistanceData(results, WHYNTER_BITS, offset, WHYNTER_BIT_MARK,
+    if (!IR_decodePulseDistanceData(results, WHYNTER_BITS, offset, WHYNTER_BIT_MARK,
         WHYNTER_ONE_SPACE, WHYNTER_ZERO_SPACE, true)) {
         return false;
     }

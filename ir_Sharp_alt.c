@@ -66,7 +66,7 @@ void sendSharpAlt(uint8_t address, uint8_t command) {
 
 //+=============================================================================
 #if DECODE_SHARP_ALT
-bool decodeSharpAlt(decode_results *results) {
+bool IR_decodeSharpAlt(ir_decode_results *results) {
     static bool is_first_repeat = true;
 
     // Check we have enough data.

@@ -18,7 +18,7 @@
 
 //+=============================================================================
 #if DECODE_LG
-bool decodeLG(decode_results *results) {
+bool IR_decodeLG(ir_decode_results *results) {
     int offset = 1; // Skip first space
 
     // Check we have the right amount of data  +3 for start bit mark and space + stop bit mark
@@ -36,7 +36,7 @@ bool decodeLG(decode_results *results) {
     }
     offset++;
 
-    if (!decodePulseDistanceData(results, LG_BITS, offset, LG_BIT_MARK,
+    if (!IR_decodePulseDistanceData(results, LG_BITS, offset, LG_BIT_MARK,
         LG_ONE_SPACE, LG_ZERO_SPACE, true)) {
         return false;
     }

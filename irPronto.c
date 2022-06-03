@@ -23,7 +23,7 @@ static unsigned int toFrequencyKHz(uint16_t code) {
     return ((referenceFrequency / code) + 500) / 1000;
 }
 
-void sendPronto(const uint16_t *data, unsigned int size, unsigned int times) {
+void IR_sendPronto(const uint16_t *data, unsigned int size, unsigned int times) {
     unsigned int timebase = (microsecondsInSeconds * data[1] + referenceFrequency / 2) / referenceFrequency;
     unsigned int khz;
     switch (data[0]) {
@@ -49,7 +49,7 @@ void sendPronto(const uint16_t *data, unsigned int size, unsigned int times) {
 
     unsigned int numberRepeats = intros > 0 ? times - 1 : times;
     if (intros > 0) {
-        sendRaw(durations, intros - 1, khz);
+        IR_sendRaw(durations, intros - 1, khz);
     }
 
     if (numberRepeats == 0)
@@ -57,7 +57,7 @@ void sendPronto(const uint16_t *data, unsigned int size, unsigned int times) {
 
     delay_ms(durations[intros - 1] / 1000U);
     for (unsigned int i = 0; i < numberRepeats; i++) {
-        sendRaw(durations + intros, repeats - 1, khz);
+        IR_sendRaw(durations + intros, repeats - 1, khz);
         if (i < numberRepeats - 1) { // skip last wait
             delay_ms(durations[intros + repeats - 1] / 1000U);
         }
@@ -79,7 +79,7 @@ void sendProntoStr(const char *str, unsigned int times) {
         data[i] = (uint16_t)(x); // If input is conforming, there can be no overflow!
         p = *endptr;
     }
-    sendPronto(data, len, times);
+    IR_sendPronto(data, len, times);
 }
 
 static uint16_t effectiveFrequency(uint16_t frequency) {
@@ -121,7 +121,7 @@ static void dumpSequence(const volatile uint16_t *data, size_t length, uint16_t 
  * Using Print instead of Stream saves 1020 bytes program memory
  * Changed from & to * parameter type to be more transparent and consistent with other code of IRremote
  */
-void dumpPronto(decode_results *results, unsigned int frequency) {
+void dumpPronto(ir_decode_results *results, unsigned int frequency) {
     dumpNumber(frequency > 0 ? learnedToken : learnedNonModulatedToken);
     dumpNumber(toFrequencyCode(frequency));
     dumpNumber((results->rawlen + 1) / 2);
@@ -134,7 +134,7 @@ void dumpPronto(decode_results *results, unsigned int frequency) {
 // Dump out the raw data as Pronto Hex.
 // I know Stream * is locally inconsistent, but all global print functions use it
 //
-void printIRResultAsPronto(decode_results *results, unsigned int frequency) {
+void printIRResultAsPronto(ir_decode_results *results, unsigned int frequency) {
     DBG_PRINT("Pronto Hex: ");
     dumpPronto(results, frequency);
     DBG_PRINT("\r\n");

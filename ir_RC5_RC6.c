@@ -10,7 +10,7 @@
 // Returns -1 for error (measured time interval is not a multiple of t1).
 //
 #if (DECODE_RC5 || DECODE_RC6)
-int getRClevel(decode_results *results, unsigned int *offset, int *used, int t1) {
+int getRClevel(ir_decode_results *results, unsigned int *offset, int *used, int t1) {
     int width;
     int val;
     int correction;
@@ -152,7 +152,7 @@ void sendRC5ext(uint8_t addr, uint8_t cmd, bool toggle) {
 
 //+=============================================================================
 #if DECODE_RC5
-bool decodeRC5(decode_results *results) {
+bool IR_decodeRC5(ir_decode_results *results) {
     int nbits;
     long data = 0;
     int used = 0;
@@ -245,7 +245,7 @@ void sendRC6(uint32_t data, uint8_t nbits) {
 
 //+=============================================================================
 #if DECODE_RC6
-bool decodeRC6(decode_results *results) {
+bool IR_decodeRC6(ir_decode_results *results) {
     int nbits;
     uint32_t data = 0;
     int used = 0;

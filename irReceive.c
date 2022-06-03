@@ -1,6 +1,6 @@
 #include "IRremote.h"
 
-static bool decodeHash(decode_results *results);
+static bool IR_decodeHash(ir_decode_results *results);
 static int compare(unsigned int oldval, unsigned int newval);
 
 
@@ -9,7 +9,7 @@ static int compare(unsigned int oldval, unsigned int newval);
 // Returns 0 if no data ready, 1 if data ready.
 // Results of decoding are stored in results
 //
-bool decode(decode_results *results) {
+bool IR_decode(ir_decode_results *results) {
     if (irparams.rcvstate != IR_REC_STATE_STOP) {
         return false;
     }
@@ -30,112 +30,112 @@ bool decode(decode_results *results) {
 
 #if DECODE_NEC_STANDARD
     DBG_PRINTLN("Attempting NEC_STANDARD decode");
-    if (decodeNECStandard(results)) {
+    if (IR_decodeNECStandard(results)) {
         return true;
     }
 #endif
 
 #if DECODE_NEC
     DBG_PRINTLN("Attempting NEC decode");
-    if (decodeNEC(results)) {
+    if (IR_decodeNEC(results)) {
         return true;
     }
 #endif
 
 #if DECODE_SHARP
     DBG_PRINTLN("Attempting Sharp decode");
-    if (decodeSharp(results)) {
+    if (IR_decodeSharp(results)) {
         return true;
     }
 #endif
 
 #if DECODE_SHARP_ALT
     DBG_PRINTLN("Attempting SharpAlt decode");
-    if (decodeSharpAlt(results)) {
+    if (IR_decodeSharpAlt(results)) {
         return true;
     }
 #endif
 
 #if DECODE_SONY
     DBG_PRINTLN("Attempting Sony decode");
-    if (decodeSony(results)) {
+    if (IR_decodeSony(results)) {
         return true;
     }
 #endif
 
 #if DECODE_SANYO
     DBG_PRINTLN("Attempting Sanyo decode");
-    if (decodeSanyo(results)) {
+    if (IR_decodeSanyo(results)) {
         return true;
     }
 #endif
 
 #if DECODE_RC5
     DBG_PRINTLN("Attempting RC5 decode");
-    if (decodeRC5(results)) {
+    if (IR_decodeRC5(results)) {
         return true;
     }
 #endif
 
 #if DECODE_RC6
     DBG_PRINTLN("Attempting RC6 decode");
-    if (decodeRC6(results)) {
+    if (IR_decodeRC6(results)) {
         return true;
     }
 #endif
 
 #if DECODE_PANASONIC
     DBG_PRINTLN("Attempting Panasonic decode");
-    if (decodePanasonic(results)) {
+    if (IR_decodePanasonic(results)) {
         return true;
     }
 #endif
 
 #if DECODE_LG
     DBG_PRINTLN("Attempting LG decode");
-    if (decodeLG(results)) {
+    if (IR_decodeLG(results)) {
         return true;
     }
 #endif
 
 #if DECODE_JVC
     DBG_PRINTLN("Attempting JVC decode");
-    if (decodeJVC(results)) {
+    if (IR_decodeJVC(results)) {
         return true;
     }
 #endif
 
 #if DECODE_SAMSUNG
     DBG_PRINTLN("Attempting SAMSUNG decode");
-    if (decodeSAMSUNG(results)) {
+    if (IR_decodeSAMSUNG(results)) {
         return true;
     }
 #endif
 
 #if DECODE_WHYNTER
     DBG_PRINTLN("Attempting Whynter decode");
-    if (decodeWhynter(results)) {
+    if (IR_decodeWhynter(results)) {
         return true;
     }
 #endif
 
 #if DECODE_DENON
     DBG_PRINTLN("Attempting Denon decode");
-    if (decodeDenon(results)) {
+    if (IR_decodeDenon(results)) {
         return true;
     }
 #endif
 
 #if DECODE_LEGO_PF
     DBG_PRINTLN("Attempting Lego Power Functions");
-    if (decodeLegoPowerFunctions(results)) {
+    if (IR_decodeLegoPowerFunctions(results)) {
         return true;
     }
 #endif
 
 #if DECODE_MAGIQUEST
     DBG_PRINTLN("Attempting MagiQuest decode");
-    if (decodeMagiQuest(results)) {
+    if (IR_decodeMagiQuest(results)) {
         return true;
     }
 #endif
@@ -145,13 +145,13 @@ bool decode(decode_results *results) {
     // decodeHash returns a hash on any input.
     // Thus, it needs to be last in the list.
     // If you add any decodes, add them before this.
-    if (decodeHash(results)) {
+    if (IR_decodeHash(results)) {
         return true;
     }
 #endif
 
     // Throw away and start over
-    resume();
+    IR_resume();
     return false;
 }
 
@@ -159,10 +159,10 @@ bool decode(decode_results *results) {
 // initialization
 //
 #ifdef USE_DEFAULT_ENABLE_IR_IN
-void enableIRIn(void) {
+void IR_enableIRIn(void) {
     // Setup timer mode and interrupts
     TIMER_DISABLE_RECEIVE_INTR;
-    timerConfigForReceive();
+    IR_timerConfigForReceive();
     TIMER_ENABLE_RECEIVE_INTR;
 
     // Initialize state machine state
@@ -170,7 +170,7 @@ void enableIRIn(void) {
     irparams.rawlen = 0;
 }
 
-void disableIRIn(void) {
+void IR_disableIRIn(void) {
     TIMER_DISABLE_RECEIVE_INTR;
 }
 #endif // USE_DEFAULT_ENABLE_IR_IN
@@ -178,7 +178,7 @@ void disableIRIn(void) {
 //+=============================================================================
 // Enable/disable blinking of BLINKLED pin 
 //
-void blink(bool blinkflag) {
+void IR_blink(bool blinkflag) {
 #ifdef BLINKLED
     irparams.blinkflag = blinkflag;
 #endif
@@ -187,11 +187,11 @@ void blink(bool blinkflag) {
 //+=============================================================================
 // Return if receiving new IR signals
 //
-bool isIdle(void) {
+bool IR_isIdle(void) {
     return (irparams.rcvstate == IR_REC_STATE_IDLE || irparams.rcvstate == IR_REC_STATE_STOP) ? true : false;
 }
 
-bool available(decode_results *results) {
+bool IR_available(ir_decode_results *results) {
     if (irparams.rcvstate != IR_REC_STATE_STOP) {
         return false;
     }
@@ -202,14 +202,14 @@ bool available(decode_results *results) {
     if (!results->overflow) {
         return true;
     }
-    resume(); //skip overflowed buffer
+    IR_resume(); //skip overflowed buffer
     return false;
 }
 
 //+=============================================================================
 // Restart the ISR state machine
 //
-void resume(void) {
+void IR_resume(void) {
     irparams.rcvstate = IR_REC_STATE_IDLE;
     irparams.rawlen = 0;
 }
@@ -251,7 +251,7 @@ static int compare(unsigned int oldval, unsigned int newval) {
  * Input is     results->rawbuf
  * Output is    results->value
  */
-bool decodePulseDistanceData(decode_results *results, uint8_t aNumberOfBits, uint8_t aStartOffset, unsigned int aBitMarkMicros,
+bool IR_decodePulseDistanceData(ir_decode_results *results, uint8_t aNumberOfBits, uint8_t aStartOffset, unsigned int aBitMarkMicros,
         unsigned int aOneSpaceMicros, unsigned int aZeroSpaceMicros, bool aMSBfirst) {
     unsigned long tDecodedData = 0;
 
@@ -309,7 +309,7 @@ bool decodePulseDistanceData(decode_results *results, uint8_t aNumberOfBits, uin
 #define FNV_PRIME_32 16777619
 #define FNV_BASIS_32 2166136261
 
-static bool decodeHash(decode_results *results) {
+static bool IR_decodeHash(ir_decode_results *results) {
     long hash = FNV_BASIS_32;
 
     // Require at least 6 samples to prevent triggering on noise
@@ -331,7 +331,7 @@ static bool decodeHash(decode_results *results) {
 }
 #endif // defined(DECODE_HASH)
 
-const char* getProtocolString(decode_results *results) {
+const char* IR_getProtocolString(ir_decode_results *results) {
     switch (results->decode_type) {
     default:
     case UNKNOWN:
@@ -430,17 +430,17 @@ const char* getProtocolString(decode_results *results) {
     }
 }
 
-void printResultShort(decode_results *results) {
+void IR_printResultShort(ir_decode_results *results) {
     DBG_PRINT("Protocol=%s Data=0x%X Address=0x%X %s\r\n",
         getProtocolString(results), results->value, results->address,
         results->isRepeat ? "R" : "");
 }
 
-void printIRResultRaw(decode_results *results) {
-    // Dumps out the decode_results structure.
+void IR_printIRResultRaw(ir_decode_results *results) {
+    // Dumps out the ir_decode_results structure.
     // Call this after decode()
     int count = results->rawlen;
-    printResultShort(results);
+    IR_printResultShort(results);
 
     DBG_PRINT("(%u bits) rawData[%u]:", results->bits, count);
     for (int i = 0; i < count; i++) {
@@ -456,9 +456,9 @@ void printIRResultRaw(decode_results *results) {
 }
 
 //+=============================================================================
-// Dump out the decode_results structure.
+// Dump out the ir_decode_results structure.
 //
-void printIRResultRawFormatted(decode_results *results) {
+void IR_printIRResultRawFormatted(ir_decode_results *results) {
     // Print Raw data
     DBG_PRINT("rawData[%u]:\r\n", results->rawlen - 1);
 
@@ -495,9 +495,9 @@ void printIRResultRawFormatted(decode_results *results) {
 }
 
 //+=============================================================================
-// Dump out the decode_results structure.
+// Dump out the ir_decode_results structure.
 //
-void printIRResultAsCArray(decode_results *results) {
+void IR_printIRResultAsCArray(ir_decode_results *results) {
     // Start declaration
     DBG_PRINT("uint16_t rawData[%u] = {", results->rawlen - 1);
 
@@ -515,13 +515,13 @@ void printIRResultAsCArray(decode_results *results) {
 
     // Comment
     DBG_PRINT("  // ");
-    printResultShort(results);
+    IR_printResultShort(results);
 
     // Newline
     DBG_PRINT("\r\n");
 }
 
-void printIRResultAsCVariables(decode_results *results) {
+void IR_printIRResultAsCVariables(ir_decode_results *results) {
     // Now dump "known" codes
     if (results->decode_type != UNKNOWN) {
 

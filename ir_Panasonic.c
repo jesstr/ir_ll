@@ -43,7 +43,7 @@ void sendPanasonic(unsigned int address, unsigned long data) {
 
 //+=============================================================================
 #if DECODE_PANASONIC
-bool decodePanasonic(decode_results *results) {
+bool IR_decodePanasonic(ir_decode_results *results) {
     int offset = 1;
 
     if (results->rawlen < (2 * PANASONIC_BITS) + 2) {
@@ -60,13 +60,13 @@ bool decodePanasonic(decode_results *results) {
     offset++;
 
     // decode address
-    if (!decodePulseDistanceData(results, PANASONIC_ADDRESS_BITS, offset, PANASONIC_BIT_MARK,
+    if (!IR_decodePulseDistanceData(results, PANASONIC_ADDRESS_BITS, offset, PANASONIC_BIT_MARK,
         PANASONIC_ONE_SPACE, PANASONIC_ZERO_SPACE, true)) {
         return false;
     }
     results->address = results->value;
 
-    if (!decodePulseDistanceData(results, PANASONIC_DATA_BITS, offset + PANASONIC_ADDRESS_BITS,
+    if (!IR_decodePulseDistanceData(results, PANASONIC_DATA_BITS, offset + PANASONIC_ADDRESS_BITS,
         PANASONIC_BIT_MARK, PANASONIC_ONE_SPACE, PANASONIC_ZERO_SPACE, true)) {
         return false;
     }

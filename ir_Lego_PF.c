@@ -40,7 +40,7 @@ void sendLegoPowerFunctions(uint16_t data, bool repeat) {
     reset(&enc, data, repeat);
     do {
         mark(getMarkDuration());
-        space_long(getPauseDuration(&enc));
+        IR_space_long(getPauseDuration(&enc));
     } while (next(&enc));
 }
 
@@ -56,7 +56,7 @@ void sendLegoPowerFunctions(uint16_t data, bool repeat) {
 #define LEGO_PF_LOWER       315
 #define LEGO_PF_BITS        16  // The number of bits in the command
 
-bool decodeLegoPowerFunctions(decode_results *results) {
+bool IR_decodeLegoPowerFunctions(ir_decode_results *results) {
     unsigned long data = 0;  // Somewhere to build our code
     DBG_PRINT("%u\r\n", results->rawlen);
     // Check we have the right amount of data

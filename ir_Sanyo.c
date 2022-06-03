@@ -21,7 +21,7 @@
 
 //+=============================================================================
 #if DECODE_SANYO
-bool decodeSanyo(decode_results *results) {
+bool IR_decodeSanyo(ir_decode_results *results) {
     long data = 0;
     unsigned int offset = 0;  // Don't skip first space, check its size
 

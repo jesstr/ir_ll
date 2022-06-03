@@ -94,7 +94,7 @@ void sendSharp(unsigned int address, unsigned int command) {
 // Tesded on a DENON AVR-1804 reciever
 
 #if DECODE_SHARP
-bool decodeSharp(decode_results *results) {
+bool IR_decodeSharp(ir_decode_results *results) {
     unsigned long lastData = 0;  // to store last data
     int offset = 1;  //skip long space
     int loops = 1; //number of bursts
@@ -118,13 +118,13 @@ bool decodeSharp(decode_results *results) {
 
     // Read the bits in
     for (int j = 0; j < loops; j++) {
-        if (!decodePulseDistanceData(results, SHARP_ADDR_BITS, offset, SHARP_BIT_MARK_SEND,
+        if (!IR_decodePulseDistanceData(results, SHARP_ADDR_BITS, offset, SHARP_BIT_MARK_SEND,
             SHARP_ONE_SPACE, SHARP_ZERO_SPACE, true)) {
             return false;
         }
         results->address = results->value;
 
-        if (!decodePulseDistanceData(results,  SHARP_DATA_BITS, offset + SHARP_ADDR_BITS, SHARP_BIT_MARK_SEND,
+        if (!IR_decodePulseDistanceData(results,  SHARP_DATA_BITS, offset + SHARP_ADDR_BITS, SHARP_BIT_MARK_SEND,
         SHARP_ONE_SPACE, SHARP_ZERO_SPACE, true)) {
             return false;
         }

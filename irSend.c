@@ -2,9 +2,9 @@
 
 #ifdef SENDING_SUPPORTED // from IRremoteBoardDefs.h
 //+=============================================================================
-void sendRaw(const unsigned int buf[], unsigned int len, unsigned int hz) {
+void IR_sendRaw(const unsigned int buf[], unsigned int len, unsigned int hz) {
     // Set IR carrier frequency
-    enableIROut(hz);
+    IR_enableIROut(hz);
 
     for (unsigned int i = 0; i < len; i++) {
         if (i & 1) {
@@ -17,9 +17,9 @@ void sendRaw(const unsigned int buf[], unsigned int len, unsigned int hz) {
     space(0);  // Always end with the LED off
 }
 
-void sendRaw_P(const unsigned int buf[], unsigned int len, unsigned int hz) {
+void IR_sendRaw_P(const unsigned int buf[], unsigned int len, unsigned int hz) {
 #if !defined(__AVR__)
-    sendRaw(buf,len,hz); // Let the function work for non AVR platforms
+    IR_sendRaw(buf,len,hz); // Let the function work for non AVR platforms
 #else
     // Set IR carrier frequency
     enableIROut(hz);
@@ -64,7 +64,7 @@ void inline sleepUntilMicros(unsigned long targetTime) {
 //+=============================================================================
 // Sends PulseDistance data from MSB to LSB
 //
-void sendPulseDistanceWidthData(unsigned int aOneMarkMicros, unsigned int aOneSpaceMicros, unsigned int aZeroMarkMicros,
+void IR_sendPulseDistanceWidthData(unsigned int aOneMarkMicros, unsigned int aOneSpaceMicros, unsigned int aZeroMarkMicros,
         unsigned int aZeroSpaceMicros, unsigned long aData, uint8_t aNumberOfBits, bool aMSBfirst) {
 
     if (aMSBfirst) {  // Send the MSB first.
@@ -133,7 +133,7 @@ void mark(uint16_t timeMicros) {
     }
 }
 
-void mark_long(uint32_t timeMicros) {
+void IR_mark_long(uint32_t timeMicros) {
 #if defined(USE_NO_SEND_PWM)
     IR_SENDPIN_OFF(); // Set output to active low.
 #else
@@ -163,7 +163,7 @@ void space(uint16_t timeMicros) {
 /*
  * used e.g. by LEGO
  */
-void space_long(uint32_t timeMicros) {
+void IR_space_long(uint32_t timeMicros) {
 #if defined(USE_NO_SEND_PWM)
     IR_SENDPIN_ON; // Set output to inactive high.
 #else
@@ -188,7 +188,7 @@ void space_long(uint32_t timeMicros) {
 // A few hours staring at the ATmega documentation and this will all make sense.
 // See my Secrets of Arduino PWM at http://arcfn.com/2009/07/secrets-of-arduino-pwm.html for details.
 //
-void enableIROut(int khz) {
+void IR_enableIROut(int khz) {
 #ifdef USE_SOFT_SEND_PWM
     periodTimeMicros = (1000U + khz / 2) / khz; // = 1000/khz + 1/2 = round(1000.0/khz)
     periodOnTimeMicros = periodTimeMicros * IR_SEND_DUTY_CYCLE / 100U - PULSE_CORRECTION_MICROS;
@@ -202,7 +202,7 @@ void enableIROut(int khz) {
 
     IR_SENDPIN_OFF; // When not sending, we want it low
 
-    timerConfigForSend(khz);
+    IR_timerConfigForSend(khz);
 #endif
 }
 #endif

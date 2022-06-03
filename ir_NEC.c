@@ -107,7 +107,7 @@ void sendNECStandard(uint16_t aAddress, uint8_t aCommand, uint8_t aNumberOfRepea
 // NECs have a repeat only 4 items long
 //
 #if DECODE_NEC
-bool decodeNEC(decode_results *results) {
+bool IR_decodeNEC(ir_decode_results *results) {
     int offset = 1;  // Index in to results; Skip first space.
 
 // Check header "mark"
@@ -137,7 +137,7 @@ bool decodeNEC(decode_results *results) {
     }
     offset++;
 
-    if (!decodePulseDistanceData(results, NEC_BITS, offset, NEC_BIT_MARK,
+    if (!IR_decodePulseDistanceData(results, NEC_BITS, offset, NEC_BIT_MARK,
         NEC_ONE_SPACE, NEC_ZERO_SPACE, true)) {
         return false;
     }
@@ -160,7 +160,7 @@ bool decodeNEC(decode_results *results) {
 // NECs have a repeat only 4 items long
 //
 #if DECODE_NEC_STANDARD
-bool decodeNECStandard(decode_results *results) {
+bool IR_decodeNECStandard(ir_decode_results *results) {
     long data = 0;  // We decode in to here; Start with nothing
     int offset = 1;  // Index in to results; Skip first space.
 
@@ -188,7 +188,7 @@ bool decodeNECStandard(decode_results *results) {
     }
     offset++;
 
-    data = decodePulseDistanceData(NEC_BITS, offset, NEC_BIT_MARK,
+    data = IR_decodePulseDistanceData(NEC_BITS, offset, NEC_BIT_MARK,
         NEC_ONE_SPACE, NEC_ZERO_SPACE, false);
 
     // Stop bit

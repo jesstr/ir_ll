@@ -14,7 +14,7 @@
 #endif
 
 
-void timerConfigForSend(uint16_t aFrequencyKHz)
+void IR_timerConfigForSend(uint16_t aFrequencyKHz)
 {
 	uint16_t pwm_freq = TIM_SYSCLOCK / (aFrequencyKHz * 1000) - 1;
 	uint16_t pwm_pulse = pwm_freq / 3;
@@ -135,7 +135,7 @@ static inline void timerConfigPeriodicForReceive(void)
 }
 #endif // USE_TIMER_IC_MODE
 
-void timerConfigForReceive(void)
+void IR_timerConfigForReceive(void)
 {
 #ifdef USE_TIMER_IC_MODE
 	timerConfigInputCaptureForReceive();

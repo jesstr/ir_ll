@@ -45,7 +45,7 @@
  C. Further down in "Main class for receiving IR", add:
  //......................................................................
  #if DECODE_SHUZU
- bool  decodeShuzu (decode_results *aResults) ;
+ bool  decodeShuzu (ir_decode_results *aResults) ;
  #endif
 
  D. Further down in "Main class for sending IR", add:
@@ -144,7 +144,7 @@ void sendShuzu(unsigned long data, int nbits) {
 //+=============================================================================
 //
 #if DECODE_SHUZU
-bool decodeShuzu(decode_results *results) {
+bool IR_decodeShuzu(ir_decode_results *results) {
     unsigned long data = 0;  // Somewhere to build our code
     int offset = 1;  // Skip the gap reading
 
@@ -164,7 +164,7 @@ bool decodeShuzu(decode_results *results) {
     }
     offset++;
 
-    data = decodePulseDistanceData(results, SHUZU_BITS, offset, SHUZU_BIT_MARK,
+    data = IR_decodePulseDistanceData(results, SHUZU_BITS, offset, SHUZU_BIT_MARK,
         SHUZU_ONE_SPACE, SHUZU_ZERO_SPACE, true);
 //    // Read the bits in
 //    for (int i = 0; i < SHUZU_BITS; i++) {

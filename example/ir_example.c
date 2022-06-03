@@ -3,19 +3,19 @@
 #include "printf.h"
 #include "IRremote.h"
 
-static decode_results results;
+static ir_decode_results ir_results;
 
 
 void ir_example_task(void const * argument)
 {
   (void)argument;
 
-  enableIRIn();
+  IR_enableIRIn();
 
   while(1) {
-    if (decode(&results)) {
+    if (IR_decode(&ir_results)) {
       printf("Code: 0x%08X | Type: %s | Address: 0x%02X\r\n",
-        results.value, getProtocolString(&results), results.address);
+        ir_results.value, IR_getProtocolString(&ir_results), ir_results.address);
 #if 0
       printf("Raw: %d\r\n", results.rawlen - 1);
       printf("-----------------\r\n");
@@ -25,7 +25,7 @@ void ir_example_task(void const * argument)
       }
       printf("\r\n-----------------\r\n");
 #endif
-      resume();
+      IR_resume();
     } else {
       osDelay(100);
     }
